@@ -4,24 +4,21 @@ import { Reveal, RevealGroup } from "./Reveal";
 export function About() {
   const { about } = client;
   return (
-    <section id="about" className="bg-surface-alt">
+    <section id="about" className="border-y border-line bg-surface-alt">
       <div className="section grid items-center gap-12 md:grid-cols-2">
         <Reveal>
           <img
             src={about.photoPath}
             alt="" // TODO(client): describe the real photo, e.g. "The Acme Mechanical crew outside the shop"
-            className="aspect-[4/3] w-full rounded-xl border border-line object-cover"
+            className="aspect-[4/3] w-full rounded border border-line object-cover"
           />
         </Reveal>
 
         <div>
           <Reveal>
-            <span className="eyebrow">{client.copy.aboutEyebrow}</span>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              {about.heading}
-            </h2>
+            <h2 className="text-4xl font-bold sm:text-5xl">{about.heading}</h2>
           </Reveal>
-          <RevealGroup className="mt-5 space-y-4" step={0.06}>
+          <RevealGroup className="mt-6 space-y-4" step={0.05}>
             {about.body.map((p) => (
               <p key={p.slice(0, 24)} className="leading-relaxed">
                 {p}
@@ -29,17 +26,20 @@ export function About() {
             ))}
           </RevealGroup>
 
+          {/* Shop-door facts: a ruled mono line, not a stat-box band */}
           {about.stats.length > 0 && (
-            <RevealGroup className="mt-8 grid grid-cols-3 gap-4" step={0.08}>
-              {about.stats.map((s) => (
-                <div key={s.label} className="rounded-lg border border-line bg-surface p-4 text-center">
-                  <div className="font-display text-2xl font-bold text-brand">
-                    {s.value}
+            <Reveal delay={0.1}>
+              <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-3 border-t border-line pt-5">
+                {about.stats.map((s) => (
+                  <div key={s.label}>
+                    <dt className="u-label">{s.label}</dt>
+                    <dd className="mt-1 font-mono text-lg font-semibold tabular-nums text-ink">
+                      {s.value}
+                    </dd>
                   </div>
-                  <div className="mt-1 text-xs text-ink-faint">{s.label}</div>
-                </div>
-              ))}
-            </RevealGroup>
+                ))}
+              </dl>
+            </Reveal>
           )}
         </div>
       </div>

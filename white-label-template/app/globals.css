@@ -3,27 +3,31 @@
 @tailwind utilities;
 
 /* ── BRAND TOKENS — edit these per client (see tailwind.config.ts) ──
-   Values are space-separated RGB channels so Tailwind opacity works. */
+   Values are space-separated RGB channels so Tailwind opacity works.
+
+   Default skin is derived from the trades world: warm paper ground
+   (estimate-pad bias), near-black warm ink, work-order rubric red as
+   the single accent, hairline rules instead of shadows. */
 :root {
   /* TODO(client): brand colors */
-  --brand: 21 94 117;          /* deep petrol */
-  --brand-strong: 14 74 94;
-  --brand-soft: 227 240 244;
+  --brand: 168 48 28;          /* work-order red */
+  --brand-strong: 134 38 22;
+  --brand-soft: 244 233 229;
 
-  --ink: 24 30 34;
-  --ink-soft: 71 82 89;
-  --ink-faint: 122 133 140;
+  --ink: 28 27 24;             /* warm near-black */
+  --ink-soft: 82 79 72;
+  --ink-faint: 133 129 119;
 
-  --surface: 252 252 251;
-  --surface-alt: 244 245 244;
-  --line: 226 229 228;
+  --surface: 251 250 246;      /* paper — warm neutral bias */
+  --surface-alt: 244 242 235;  /* tonal step, no shadows */
+  --line: 224 220 209;
 
-  /* TODO(client): typefaces. System stacks ship by default so builds
-     need no network. To use a webfont, self-host it in /public/fonts,
-     add @font-face below, and change these stacks. */
-  --font-display: "Avenir Next", "Segoe UI", system-ui, -apple-system,
-    sans-serif;
+  /* TODO(client): typefaces. Display ships self-hosted via Fontsource
+     (see app/layout.tsx import). To swap: npm i @fontsource/<face>,
+     change the import, change this stack. */
+  --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-utility: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 html {
@@ -40,8 +44,29 @@ body {
   @apply bg-surface font-body text-ink-soft antialiased;
 }
 
-h1, h2, h3, h4 {
-  @apply font-display text-ink;
+h1, h2, h3 {
+  @apply font-display uppercase tracking-wide text-ink;
+}
+
+h4 {
+  @apply text-ink;
+}
+
+/* Selection, caret, scrollbar — themed, not inherited */
+::selection {
+  background: rgb(var(--ink));
+  color: rgb(var(--surface));
+}
+
+input, textarea {
+  caret-color: rgb(var(--brand));
+}
+
+@media (min-width: 768px) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--ink-faint)) transparent;
+  }
 }
 
 /* Visible keyboard focus everywhere */
@@ -50,11 +75,27 @@ h1, h2, h3, h4 {
   outline-offset: 2px;
 }
 
-/* Shared section rhythm */
+/* ── Spacing registers ──────────────────────────────────────────────
+   Intra-component: 8/12/20px (gap-2 / gap-3 / gap-5 in markup).
+   Section beat: 56px mobile / 88px desktop. The contact section takes
+   a deliberately larger 128px top break (.section-break) to mark the
+   change of register into the work-order sheet. */
 .section {
-  @apply mx-auto w-full max-w-content px-5 py-20 sm:px-8 md:py-28;
+  @apply mx-auto w-full max-w-content px-5 py-14 sm:px-8 md:py-[88px];
 }
 
-.eyebrow {
-  @apply mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-brand;
+.section-break {
+  @apply md:pt-32;
+}
+
+/* Mono utility labels — form-header register (license, hours, field
+   labels). Used sparingly; not a decorative kicker above headings. */
+.u-label {
+  @apply font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Buttons: pressed state everywhere, no hover lifts */
+.btn-press {
+  @apply transition-colors active:translate-y-px;
 }

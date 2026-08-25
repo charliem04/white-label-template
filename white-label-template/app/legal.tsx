@@ -16,7 +16,7 @@ export function LegalPage({
         ← Back to {client.businessName}
       </Link>
       <h1 className="mt-6 text-3xl font-bold tracking-tight">{title}</h1>
-      <div className="prose-legal mt-8 space-y-5 leading-relaxed [&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-semibold">
+      <div className="prose-legal mt-8 space-y-5 leading-relaxed [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:font-bold">
         {children}
       </div>
     </div>

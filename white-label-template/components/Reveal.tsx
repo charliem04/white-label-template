@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Scroll-reveal wrapper. Fades content into place the first time it
- * enters the viewport. Pass `delay` (seconds) to stagger siblings, or
- * use <RevealGroup> for automatic cascade on grids.
+ * Scroll-reveal wrapper. Short-travel fade (12px, 400ms) the first time
+ * content enters the viewport. Pass `delay` (seconds) to stagger
+ * siblings, or use <RevealGroup> for cascade on lists/grids.
  * Respects prefers-reduced-motion (renders static).
  */
 import { motion, useReducedMotion } from "framer-motion";
@@ -23,10 +23,10 @@ export function Reveal({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.55, delay, ease: [0.21, 0.65, 0.36, 1] }}
+      viewport={{ once: true, margin: "-64px" }}
+      transition={{ duration: 0.4, delay, ease: [0.21, 0.65, 0.36, 1] }}
     >
       {children}
     </motion.div>
@@ -36,7 +36,7 @@ export function Reveal({
 /** Cascade children with a fixed stagger step. */
 export function RevealGroup({
   children,
-  step = 0.08,
+  step = 0.06,
   className,
   itemClassName,
 }: {

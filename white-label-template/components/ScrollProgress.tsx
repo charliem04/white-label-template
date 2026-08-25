@@ -1,6 +1,6 @@
 "use client";
 
-/** Thin brand-colored progress bar fixed to the top of the viewport. */
+/** Hairline reading-progress bar. Ink, not accent — quiet by design. */
 import { motion, useScroll, useSpring, useReducedMotion } from "framer-motion";
 
 export function ScrollProgress() {
@@ -15,7 +15,7 @@ export function ScrollProgress() {
   return (
     <motion.div
       aria-hidden
-      className="fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-brand"
+      className="fixed inset-x-0 top-0 z-50 h-px origin-left bg-ink"
       style={{ scaleX }}
     />
   );

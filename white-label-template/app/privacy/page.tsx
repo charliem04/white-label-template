@@ -18,7 +18,7 @@ export default function PrivacyPage() {
 
   return (
     <LegalPage title="Privacy Policy">
-      <p className="rounded-lg border border-line bg-surface-alt p-4 text-sm font-medium">
+      <p className="rounded border border-line bg-surface-alt p-4 text-sm font-medium">
         ⚠️ REPLACE BEFORE LAUNCH — this is generic starter text, not legal
         advice. Review with the business owner or their attorney.
       </p>

@@ -40,9 +40,12 @@ to bottom → `npm run deploy`.
       actually runs (analytics on/off, lead webhook on/off)
 
 ## 5. Brand
-- [ ] `app/globals.css` — set the `--brand*` color tokens
-- [ ] Fonts: self-host in `/public/fonts` + `@font-face` if the brand
-      needs a webfont; otherwise keep system stacks
+- [ ] `app/globals.css` — set the color tokens (`--brand*`, `--ink*`,
+      `--surface*`, `--line`). Default skin: paper ground, warm ink,
+      work-order red accent, 2px radius, rules instead of shadows.
+- [ ] Display font: default is Barlow Condensed via Fontsource. To
+      swap: `npm i @fontsource/<face>`, change the import in
+      `app/layout.tsx`, and update `--font-display` in globals.css.
 
 ## 6. Verify before DNS cutover
 - [ ] `npm run build` clean
@@ -54,6 +57,11 @@ to bottom → `npm run deploy`.
 - [ ] Rich Results Test on the LocalBusiness JSON-LD
 - [ ] tel:/sms: links work from a real phone
 - [ ] Grep the repo for `TODO(client)` — must return zero results
+- [ ] `npm run check` — the design checker's remaining findings all sit
+      in `client.config.ts` flagging placeholder identity (acme,
+      example.com, 555 number). They go quiet once real client data is
+      in. New findings elsewhere mean a component edit inherited a
+      default — fix or consciously suppress with `deliberate-ignore`.
 
 ## Deploy
 ```bash

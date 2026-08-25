@@ -2,30 +2,30 @@ import { client } from "@/client.config";
 import { Icon } from "./Icon";
 import { Reveal, RevealGroup } from "./Reveal";
 
+/**
+ * Services as a line-item list — the register of an invoice or the
+ * services board on the shop wall — rather than an icon-chip card grid.
+ */
 export function Services() {
   return (
     <section id="services" className="section">
       <Reveal>
-        <span className="eyebrow">{client.copy.servicesEyebrow}</span>
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <h2 className="text-4xl font-bold sm:text-5xl">
           {client.copy.servicesHeading}
         </h2>
       </Reveal>
 
-      <RevealGroup
-        className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
-        step={0.08}
-      >
+      <RevealGroup className="mt-10 border-t border-line" step={0.06}>
         {client.services.map((s) => (
           <article
             key={s.title}
-            className="group rounded-xl border border-line bg-surface p-6 transition-all hover:-translate-y-1 hover:border-brand/40 hover:shadow-md"
+            className="grid gap-2 border-b border-line py-6 transition-colors hover:bg-surface-alt active:bg-line/40 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] sm:gap-8 sm:py-7"
           >
-            <div className="mb-4 inline-flex rounded-lg bg-brand-soft p-3 text-brand">
-              <Icon name={s.icon} />
-            </div>
-            <h3 className="text-lg font-semibold">{s.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed">{s.description}</p>
+            <h3 className="flex items-center gap-3 text-2xl font-bold">
+              <Icon name={s.icon} className="h-5 w-5 shrink-0 text-brand" />
+              {s.title}
+            </h3>
+            <p className="leading-relaxed sm:pt-1">{s.description}</p>
           </article>
         ))}
       </RevealGroup>

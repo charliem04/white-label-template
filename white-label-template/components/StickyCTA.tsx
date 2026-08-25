@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Mobile-only sticky call/text bar — the highest-converting element on
- * trade sites. Hidden on md+ where the nav CTA is visible.
+ * Mobile-only sticky call/estimate bar — the highest-converting element
+ * on trade sites. Hidden on md+ where the nav CTA is visible.
  */
 import { client } from "@/client.config";
 
@@ -20,7 +20,7 @@ export function StickyCTA() {
       </a>
       <a
         href="#contact"
-        className="flex items-center justify-center gap-2 bg-surface py-3.5 font-semibold text-ink"
+        className="flex items-center justify-center gap-2 bg-surface py-3.5 font-semibold text-ink active:bg-surface-alt"
       >
         {client.copy.stickyCtaLabel}
       </a>

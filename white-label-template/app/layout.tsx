@@ -1,4 +1,9 @@
 import type { Metadata } from "next";
+// Display face, self-hosted via Fontsource (bundled at build, no CDN).
+// TODO(client): if the brand needs a different face, swap the package
+// and the --font-display stack in globals.css together.
+import "@fontsource/barlow-condensed/600.css";
+import "@fontsource/barlow-condensed/700.css";
 import "./globals.css";
 import { client } from "@/client.config";
 import { JsonLd } from "@/components/JsonLd";

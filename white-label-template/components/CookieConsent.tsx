@@ -23,12 +23,12 @@ export function CookieConsent() {
     <div
       role="dialog"
       aria-label="Cookie consent"
-      className="fixed inset-x-3 bottom-20 z-50 mx-auto max-w-xl rounded-xl border border-line bg-surface p-5 shadow-lg md:bottom-5"
+      className="fixed inset-x-3 bottom-20 z-50 mx-auto max-w-xl rounded border border-ink bg-surface p-5 md:bottom-5"
     >
       <p className="text-sm leading-relaxed">
         We use cookies for basic analytics to understand how the site is used.
         No analytics load unless you accept. See our{" "}
-        <Link href="/privacy/" className="font-medium text-brand underline">
+        <Link href="/privacy/" className="font-medium text-brand underline underline-offset-2">
           privacy policy
         </Link>
         .
@@ -36,13 +36,13 @@ export function CookieConsent() {
       <div className="mt-4 flex gap-3">
         <button
           onClick={() => choose("accepted")}
-          className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-strong"
+          className="btn-press rounded bg-ink px-4 py-2 text-sm font-semibold text-surface hover:bg-ink-soft active:bg-ink-soft"
         >
           Accept
         </button>
         <button
           onClick={() => choose("declined")}
-          className="rounded-md border border-line px-4 py-2 text-sm font-semibold text-ink hover:border-ink-faint"
+          className="btn-press rounded border border-line px-4 py-2 text-sm font-semibold text-ink hover:border-ink-faint active:bg-surface-alt"
         >
           Decline
         </button>

@@ -7,17 +7,11 @@ import type { Config } from "tailwindcss";
  * file should not need to change per client.
  *
  * Tokens to set per client (in globals.css):
- *   --brand          primary brand color (CTAs, accents)
- *   --brand-strong   hover/active state of primary
- *   --brand-soft     tinted background (icon chips, highlights)
- *   --ink            headings / primary text
- *   --ink-soft       body text
- *   --ink-faint      captions, meta text
- *   --surface        page background
- *   --surface-alt    alternating section background
- *   --line           borders / dividers
- *   --font-display   heading typeface stack
- *   --font-body      body typeface stack
+ *   --brand / --brand-strong / --brand-soft   accent + states
+ *   --ink / --ink-soft / --ink-faint          text
+ *   --surface / --surface-alt                 grounds (tonal elevation)
+ *   --line                                    rules / dividers
+ *   --font-display / --font-body / --font-utility
  * ────────────────────────────────────────────────────────────────────
  */
 const config: Config = {
@@ -44,6 +38,11 @@ const config: Config = {
       fontFamily: {
         display: "var(--font-display)",
         body: "var(--font-body)",
+        mono: "var(--font-utility)",
+      },
+      borderRadius: {
+        // One radius for the whole site: 2px. Paperwork, not cards.
+        DEFAULT: "2px",
       },
       maxWidth: {
         content: "72rem",

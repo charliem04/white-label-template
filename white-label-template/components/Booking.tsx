@@ -70,19 +70,18 @@ export function Booking() {
   if (!client.calLink) return null;
 
   return (
-    <section id="booking" className="bg-surface-alt">
+    <section id="booking" className="border-y border-line bg-surface-alt">
       <div className="section">
         <Reveal>
-          <span className="eyebrow">{client.copy.bookingEyebrow}</span>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="text-4xl font-bold sm:text-5xl">
             {client.copy.bookingHeading}
           </h2>
-          <p className="mt-3 max-w-xl">{client.copy.bookingBlurb}</p>
+          <p className="mt-3 max-w-xl leading-relaxed">{client.copy.bookingBlurb}</p>
         </Reveal>
-        <Reveal delay={0.1}>
+        <Reveal delay={0.08}>
           <div
             ref={ref}
-            className="mt-8 min-h-[560px] overflow-hidden rounded-xl border border-line bg-surface"
+            className="mt-8 min-h-[560px] overflow-hidden rounded border border-line bg-surface"
           />
         </Reveal>
       </div>

@@ -8,23 +8,25 @@ const links = [
   { href: "#services", label: "Services" },
   { href: "#about", label: "About" },
   { href: "#booking", label: "Book online" },
-  { href: "#contact", label: "Contact" },
+  { href: "#contact", label: "Estimate" },
 ];
 
 export function Nav() {
   const [open, setOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
+    // Solid ground + hairline rule. No translucency, no blur.
+    <header className="sticky top-0 z-40 border-b border-line bg-surface">
       <div className="mx-auto flex max-w-content items-center justify-between px-5 py-3 sm:px-8">
         <a href="#top" className="flex items-center gap-2.5">
           <Image
             src={client.logoPath}
             alt={`${client.businessName} logo`} // TODO(client): confirm alt reads well with real logo
-            width={36}
-            height={36}
-            className="h-9 w-9"
+            width={34}
+            height={34}
+            className="h-8 w-8"
           />
-          <span className="font-display text-lg font-semibold text-ink">
+          {/* deliberate-ignore flat-type-scale — a nav bar is legitimately narrow-range; the page-level scale runs 11px to 72px */}
+          <span className="font-display text-xl font-bold uppercase tracking-wide text-ink">
             {client.businessName}
           </span>
         </a>
@@ -34,14 +36,15 @@ export function Nav() {
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-ink-soft transition-colors hover:text-ink"
+              className="text-sm font-medium text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline active:text-ink-faint"
             >
               {l.label}
             </a>
           ))}
+          {/* The dispatch line is the point of the site — mono, ink, unmissable */}
           <a
             href={`tel:${client.phoneHref}`}
-            className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-strong"
+            className="btn-press rounded border border-ink px-4 py-2 font-mono text-sm font-semibold tabular-nums text-ink hover:bg-ink hover:text-surface active:bg-ink-soft"
           >
             {client.phone}
           </a>
@@ -73,7 +76,7 @@ export function Nav() {
           ))}
           <a
             href={`tel:${client.phoneHref}`}
-            className="mt-2 block rounded-md bg-brand px-4 py-2.5 text-center font-semibold text-white"
+            className="btn-press mt-2 block rounded bg-brand px-4 py-2.5 text-center font-semibold text-white hover:bg-brand-strong active:bg-brand-strong"
           >
             Call {client.phone}
           </a>

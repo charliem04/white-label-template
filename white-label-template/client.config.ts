@@ -122,8 +122,8 @@ export const client = {
     photoPath: "/placeholder/about.svg", // TODO(client) — team/shop photo
     stats: [
       { value: "20+", label: "Years in business" },
-      { value: "4,800", label: "Jobs completed" },
-      { value: "4.9★", label: "Google rating" },
+      { value: "4,816", label: "Jobs completed" },
+      { value: "4.9 / 5", label: "Google rating" },
     ], // TODO(client) — set to [] to hide the stats row
   },
 
@@ -159,17 +159,12 @@ export const client = {
   // ── Section copy (headings/CTAs — usually fine as-is) ─────────────
   copy: {
     heroCta: "Get a free estimate",
-    heroSecondaryCta: "Call now",
-    servicesEyebrow: "What we do",
+    heroSecondaryCta: "Call or text",
     servicesHeading: "Services",
-    aboutEyebrow: "Who we are",
-    testimonialsEyebrow: "What customers say",
     testimonialsHeading: "Word travels",
-    bookingEyebrow: "Skip the phone tag",
     bookingHeading: "Book a time that works",
     bookingBlurb:
       "Pick a slot and we'll confirm by text. Prefer to talk? Call or send the form below.",
-    contactEyebrow: "Get in touch",
     contactHeading: "Request an estimate",
     stickyCtaLabel: "Free estimate",
   },
