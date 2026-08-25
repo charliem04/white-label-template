@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── BRAND TOKENS — edit these per client (see tailwind.config.ts) ──
+   Values are space-separated RGB channels so Tailwind opacity works. */
+:root {
+  /* TODO(client): brand colors */
+  --brand: 21 94 117;          /* deep petrol */
+  --brand-strong: 14 74 94;
+  --brand-soft: 227 240 244;
+
+  --ink: 24 30 34;
+  --ink-soft: 71 82 89;
+  --ink-faint: 122 133 140;
+
+  --surface: 252 252 251;
+  --surface-alt: 244 245 244;
+  --line: 226 229 228;
+
+  /* TODO(client): typefaces. System stacks ship by default so builds
+     need no network. To use a webfont, self-host it in /public/fonts,
+     add @font-face below, and change these stacks. */
+  --font-display: "Avenir Next", "Segoe UI", system-ui, -apple-system,
+    sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  @apply bg-surface font-body text-ink-soft antialiased;
+}
+
+h1, h2, h3, h4 {
+  @apply font-display text-ink;
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid rgb(var(--brand));
+  outline-offset: 2px;
+}
+
+/* Shared section rhythm */
+.section {
+  @apply mx-auto w-full max-w-content px-5 py-20 sm:px-8 md:py-28;
+}
+
+.eyebrow {
+  @apply mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-brand;
+}
