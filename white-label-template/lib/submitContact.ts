@@ -21,6 +21,11 @@ export type ContactPayload = {
   name: string;
   phone: string;
   email: string;
+  /** Which job — one of client.form.serviceOptions */
+  service: string;
+  /** How soon — one of client.form.urgencyOptions */
+  urgency: string;
+  /** Free-text detail; optional on the form */
   message: string;
   /** honeypot — must be empty; bots fill it */
   company?: string;
@@ -51,6 +56,8 @@ export async function submitContact(
     name: payload.name,
     phone: payload.phone,
     email: payload.email,
+    service: payload.service,
+    urgency: payload.urgency,
     message: payload.message,
     source: typeof window !== "undefined" ? window.location.href : "",
     submittedAt: new Date().toISOString(),

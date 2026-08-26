@@ -13,6 +13,9 @@ to bottom → `npm run deploy`.
 - [ ] `calLink` (client's Cal.com "username/event" — or `""` to hide booking)
 - [ ] `socials` (empty string hides a link)
 - [ ] `services` — icons, titles, descriptions
+- [ ] `form.serviceOptions`, `form.urgencyOptions` — the two required
+      dropdowns on the contact sheet; match the trades the client actually
+      takes calls for
 - [ ] `about` — heading, body paragraphs, stats (or `[]`)
 - [ ] `testimonials` — REAL reviews only (or `[]` to hide the section)
 - [ ] `badges` — real license number(s)

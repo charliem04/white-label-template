@@ -13,23 +13,34 @@ import { Reveal } from "./Reveal";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
+const EMPTY = {
+  name: "",
+  phone: "",
+  email: "",
+  service: "",
+  urgency: "",
+  message: "",
+  company: "", // honeypot
+};
+
 export function Contact() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const [form, setForm] = useState(EMPTY);
+
+  const set =
+    (key: keyof typeof EMPTY) =>
+    (e: { target: { value: string } }) =>
+      setForm((f) => ({ ...f, [key]: e.target.value }));
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
     setStatus("sending");
-    const result = await submitContact({
-      name: String(fd.get("name") ?? ""),
-      phone: String(fd.get("phone") ?? ""),
-      email: String(fd.get("email") ?? ""),
-      message: String(fd.get("message") ?? ""),
-      company: String(fd.get("company") ?? ""),
-    });
+    setError("");
+    const result = await submitContact(form);
     if (result.ok) {
       setStatus("sent");
+      setForm(EMPTY);
     } else {
       setError(result.error);
       setStatus("error");
@@ -40,6 +51,12 @@ export function Contact() {
   const field =
     "w-full border-0 border-b border-line bg-transparent px-0 py-2 text-ink " +
     "placeholder:text-ink-faint focus:border-ink focus:ring-0";
+
+  // Selects keep the same rule; native chrome is stripped so the caret
+  // beside them can be set in the sheet's mono register.
+  const select = `${field} cursor-pointer appearance-none pr-6`;
+  // An unchosen select sits at placeholder weight, like an unfilled blank.
+  const selectTone = (v: string) => (v ? "text-ink" : "text-ink-faint");
 
   return (
     <section id="contact" className="section section-break">
@@ -77,29 +94,128 @@ export function Contact() {
                   <div className="grid gap-5 sm:grid-cols-2">
                     <label className="block">
                       <span className="u-label mb-1 block">Name</span>
-                      <input name="name" required autoComplete="name" className={field} />
+                      <input
+                        name="name"
+                        required
+                        maxLength={100}
+                        autoComplete="name"
+                        value={form.name}
+                        onChange={set("name")}
+                        className={field}
+                      />
                     </label>
                     <label className="block">
                       <span className="u-label mb-1 block">Phone</span>
-                      <input name="phone" type="tel" required autoComplete="tel" className={`${field} font-mono tabular-nums`} />
+                      <input
+                        name="phone"
+                        type="tel"
+                        required
+                        maxLength={30}
+                        autoComplete="tel"
+                        value={form.phone}
+                        onChange={set("phone")}
+                        className={`${field} font-mono tabular-nums`}
+                      />
                     </label>
                   </div>
+
                   <label className="block">
-                    <span className="u-label mb-1 block">Email (optional)</span>
-                    <input name="email" type="email" autoComplete="email" className={field} />
+                    <span className="u-label mb-1 block">Email</span>
+                    <input
+                      name="email"
+                      type="email"
+                      required
+                      maxLength={254}
+                      autoComplete="email"
+                      value={form.email}
+                      onChange={set("email")}
+                      className={field}
+                    />
                   </label>
+
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="u-label mb-1 block">Work requested</span>
+                      <span className="relative block">
+                        <select
+                          name="service"
+                          required
+                          value={form.service}
+                          onChange={set("service")}
+                          className={`${select} ${selectTone(form.service)}`}
+                        >
+                          <option value="">Select…</option>
+                          {client.form.serviceOptions.map((s) => (
+                            <option key={s} value={s} className="text-ink">
+                              {s}
+                            </option>
+                          ))}
+                        </select>
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute bottom-2.5 right-0 font-mono text-xs text-ink-faint"
+                        >
+                          ▾
+                        </span>
+                      </span>
+                    </label>
+
+                    <label className="block">
+                      <span className="u-label mb-1 block">Needed by</span>
+                      <span className="relative block">
+                        <select
+                          name="urgency"
+                          required
+                          value={form.urgency}
+                          onChange={set("urgency")}
+                          className={`${select} ${selectTone(form.urgency)}`}
+                        >
+                          <option value="">Select…</option>
+                          {client.form.urgencyOptions.map((u) => (
+                            <option key={u} value={u} className="text-ink">
+                              {u}
+                            </option>
+                          ))}
+                        </select>
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute bottom-2.5 right-0 font-mono text-xs text-ink-faint"
+                        >
+                          ▾
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+
                   <label className="block">
-                    <span className="u-label mb-1 block">Work requested</span>
-                    <textarea name="message" rows={4} required className={field} />
+                    <span className="u-label mb-1 block">Details (optional)</span>
+                    <textarea
+                      name="message"
+                      rows={4}
+                      maxLength={2000}
+                      value={form.message}
+                      onChange={set("message")}
+                      className={`${field} resize-none`}
+                    />
                   </label>
+
                   {/* Honeypot — visually hidden, bots fill it */}
                   <label className="absolute -left-[9999px]" aria-hidden tabIndex={-1}>
                     Company
-                    <input name="company" tabIndex={-1} autoComplete="off" />
+                    <input
+                      name="company"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={form.company}
+                      onChange={set("company")}
+                    />
                   </label>
 
                   {status === "error" && (
-                    <p role="alert" className="text-sm font-medium text-brand">
+                    <p
+                      role="alert"
+                      className="border-l-2 border-brand pl-3 text-sm font-medium text-brand"
+                    >
                       {error}
                     </p>
                   )}
@@ -107,7 +223,7 @@ export function Contact() {
                   <button
                     type="submit"
                     disabled={status === "sending"}
-                    className="btn-press rounded bg-brand px-7 py-3 text-lg font-semibold text-white hover:bg-brand-strong active:bg-brand-strong disabled:opacity-60"
+                    className="btn-press rounded bg-brand px-7 py-3 text-lg font-semibold text-white hover:bg-brand-strong active:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {status === "sending" ? "Sending…" : "Send request"}
                   </button>

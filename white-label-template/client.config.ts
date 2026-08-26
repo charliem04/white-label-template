@@ -112,6 +112,33 @@ export const client = {
     },
   ] as Service[], // TODO(client)
 
+  // ── Contact form dropdowns ────────────────────────────────────────
+  /**
+   * The two <select> fields on the work-order sheet. Both are required,
+   * so keep the lists short enough to scan. Order them the way a
+   * dispatcher would read them, not alphabetically-for-its-own-sake.
+   */
+  form: {
+    serviceOptions: [
+      "AC repair",
+      "AC installation",
+      "Heating repair",
+      "Heating installation",
+      "Maintenance / tune-up",
+      "Ductwork",
+      "Indoor air quality",
+      "Emergency — no heat / no cool",
+      "Something else",
+    ],
+    urgencyOptions: [
+      "Emergency — ASAP",
+      "Within 24 hours",
+      "This week",
+      "This month",
+      "Just planning ahead",
+    ],
+  }, // TODO(client)
+
   // ── About ─────────────────────────────────────────────────────────
   about: {
     heading: "A local shop, not a call center",

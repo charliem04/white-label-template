@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "white-label-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "white-label-template", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}
