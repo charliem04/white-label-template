@@ -1,0 +1,17 @@
+{
+  "name": "client-careers-upload",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "wrangler dev --env dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "retention": "bash scripts/set-retention.sh",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250801.0",
+    "typescript": "^5.6.0",
+    "wrangler": "^3.90.0"
+  }
+}

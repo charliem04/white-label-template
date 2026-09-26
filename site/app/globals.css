@@ -1,0 +1,315 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── BRAND TOKENS — edit these per client, and nothing else ─────────
+   Values are space-separated RGB channels so Tailwind opacity works
+   (`bg-brand/20` resolves against these). tailwind.config.ts maps every
+   color utility onto them, so it should not need editing per client.
+
+   TODO(client): replace this whole block. What ships here is the
+   template's house skin, derived from the trades world: warm paper
+   ground (estimate-pad bias), near-black warm ink, work-order rubric
+   red as the single action colour, hairline rules instead of shadows.
+   It is a real skin, not a neutral one — re-skin it per client rather
+   than shipping a second client in the same paperwork.
+
+   ── HOW TO PICK THEM ────────────────────────────────────────────────
+
+   Sample from the client's own logo rather than from a palette
+   generator. Two accents, and they do different jobs:
+
+     --brand    STRUCTURE. Links, focus rings, hover rules, the closing
+                band ground. Appears constantly, so it has to be quiet.
+     --accent   ACTION. Buttons and one or two pointing devices, and
+                nothing else. The moment it appears on a third thing it
+                stops meaning "press this".
+
+   --accent-ink is the text colour ON the action colour. The skin this
+   was extracted from ran a light gold with ink on it; red wants paper
+   on it. Pick whichever of the two clears 4.5:1 against --accent.
+
+   Check contrast before committing: --ink-faint is the one that fails,
+   because it is the lightest text and it lands on --surface-alt. Aim
+   for 4.5:1 on body copy and 3:1 on large display type. The values
+   below measure: ink-faint on surface-alt 5.1:1, accent-ink on accent
+   6.5:1, brand-soft (the mono labels) on surface-alt 4.9:1.
+
+   Dark grounds get their own accent — see the block after :root.
+
+   scripts/check.mjs (`npm run check`) flags inherited defaults —
+   Tailwind's stock indigo, the Material easing curve, a stat band of
+   suspiciously round numbers. Run it after re-skinning. */
+:root {
+  /* Structure accent. Links, focus rings, the closing band ground. */
+  --brand: 52 49 44; /* warm graphite */
+  --brand-strong: 28 27 24;
+  --brand-soft: 108 104 96; /* mono labels — check on surface-alt */
+
+  /* Action accent. Buttons only, always with --accent-ink on it. */
+  --accent: 168 48 28; /* work-order red */
+  --accent-lift: 188 60 38;
+  --accent-press: 134 38 22;
+  --accent-ink: 251 250 246;
+
+  --ink: 28 27 24; /* warm near-black: deepest ground, headings on light */
+  --ink-soft: 82 79 72; /* body copy on light ground */
+  --ink-faint: 106 102 94; /* captions, placeholders — check this one */
+  --ink-invert: 251 250 246; /* headings on the deep ground */
+  --ink-invert-soft: 214 209 197; /* body copy on the deep ground */
+
+  --surface: 251 250 246; /* paper — warm neutral bias */
+  --surface-alt: 244 242 235; /* tonal step, no shadows */
+  --surface-deep: 28 27 24; /* dark band ground */
+  --surface-deep-alt: 44 42 38; /* raised dark surface */
+
+  /* Form errors. Deliberately darker and cooler than the action red so
+     an error never reads as a button. */
+  --danger: 153 27 27;
+  --danger-soft: 252 242 240;
+
+  --line: 224 220 209; /* hairline on light */
+  --line-dark: 240 236 226; /* hairline on dark grounds — used at 20% */
+
+  /* Type. Swap these AND the @fontsource imports in app/layout.tsx
+     together — a stack naming a face that was never imported falls
+     silently back to the system font and nobody notices for a week.
+     Body and utility are system stacks on purpose: nothing to
+     download, and they read as paperwork rather than as a brand. */
+  --font-display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-utility: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Decorative rhythm used by the SeamMark in components/SectionHead. */
+  --rib: 26px;
+}
+
+/* ── THE ACCENT ON DARK GROUNDS ──────────────────────────────────────
+   Work-order red is 2.5:1 on the deep ground — fine as a button fill,
+   unreadable as a link or a label, and the utility bar and footer are
+   full of both. The skin this came from never met the problem because
+   gold is light enough to sit on ink.
+
+   So the accent is re-declared inside every dark ground rather than
+   patched component by component: a lighter red that measures 6.2:1 on
+   --surface-deep and 4.7:1 on --brand, with ink on it instead of paper.
+   Every bg-accent, text-accent and border-accent inside these grounds
+   picks it up with no markup change, including anything added later.
+   Re-skinning? Re-check this block with the one above. */
+.on-deep,
+.bg-surface-deep,
+.bg-brand {
+  --accent: 236 124 98;
+  --accent-lift: 244 146 122;
+  --accent-press: 214 102 76;
+  --accent-ink: 28 27 24;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* The header is sticky, so an element jumped to by its id would come to
+   rest underneath it — you land on the section you asked for with its
+   heading hidden behind the bar. :target rather than [id] so this only
+   applies to the element actually being navigated to, and costs nothing
+   anywhere else.
+
+   This is the native-scroll half. Lenis does not read scroll-margin, so
+   it is told the same offset directly in components/SmoothScroll.tsx —
+   change one and change the other. */
+:target {
+  scroll-margin-top: 96px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Framer writes an entrance's starting state into the markup as an
+     inline style, and the export is built once with no visitor, so that
+     happens whatever this browser prefers. The components do stop
+     animating — see useStillness in lib/useScrollMotion.ts — but only
+     from their second render, because the first has to match the HTML
+     it is hydrating or React throws the whole tree away.
+
+     This covers the frame in between. Same selector as the <noscript>
+     rule in app/layout.tsx, for the same reason: catch every animated
+     element, including ones added by someone who never read this. */
+  [style*="opacity:0"] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* A masked headline line has no opacity to neutralise — it is parked
+     below its clip by a transform alone, so the rule above never
+     matched it and the heading stayed invisible. Marked explicitly
+     rather than matched on "translateY", which would also catch
+     transforms doing real layout work elsewhere. */
+  [data-mask-line] {
+    transform: none !important;
+  }
+}
+
+body {
+  @apply bg-surface font-body text-[17px] leading-[1.62] text-ink-soft antialiased;
+}
+
+h1, h2, h3, h4 {
+  @apply font-display uppercase text-ink;
+  letter-spacing: 0.005em;
+}
+
+h1, h2 {
+  @apply font-extrabold leading-[0.9];
+}
+
+h3, h4 {
+  @apply font-bold leading-none;
+}
+
+/* Selection, caret, scrollbar — themed, not inherited */
+::selection {
+  background: rgb(var(--ink));
+  color: rgb(var(--surface));
+}
+
+input, textarea, select {
+  caret-color: rgb(var(--brand));
+}
+
+html {
+  scrollbar-color: rgb(var(--brand-soft)) rgb(var(--surface-alt));
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--surface-alt));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--brand-soft));
+  border: 3px solid rgb(var(--surface-alt));
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--brand));
+}
+
+/* Visible keyboard focus everywhere. On the deep ground the ring
+   switches to the accent, which is re-declared light enough to read
+   there (see THE ACCENT ON DARK GROUNDS above). */
+:focus-visible {
+  outline: 2px solid rgb(var(--brand));
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+.on-deep :focus-visible {
+  outline-color: rgb(var(--accent));
+}
+
+/* ── Spacing registers ──────────────────────────────────────────────
+   Intra-component: 6/10/16/26/42px (the gap-* scale in markup).
+   Band beat: a single clamp so the page breathes the same at every
+   width. The utility bar breaks the register deliberately — it is a
+   40px rail, not a band. */
+.section {
+  @apply mx-auto w-full max-w-content px-[clamp(18px,4vw,44px)];
+}
+
+.band {
+  @apply py-[clamp(74px,9vw,126px)];
+}
+
+/* ── THE SAME-GROUND SEAM ────────────────────────────────────────────
+   Nearly every band on this site is separated from its neighbour by a
+   change of ground, so the two paddings either side of a seam read as
+   the edge of a colour rather than as space. Where two bands share a
+   ground — the proof band running into recent work on the home page —
+   there is no colour doing that work and the two paddings simply add
+   up to a quarter of the viewport in white, which reads as a section
+   that failed to load. `band-seam` goes on the first of such a pair
+   and halves both sides of the join: still a clear beat between two
+   headings, without the hole. */
+.band-seam {
+  @apply pb-[clamp(36px,4.5vw,62px)];
+}
+
+.band-seam + .band {
+  @apply pt-[clamp(36px,4.5vw,62px)];
+}
+
+/* Mono utility labels — the register the client's own paperwork uses for
+   field names, hours and spec keys. Never a decorative kicker. */
+/* In @layer components on purpose. Unlayered, this rule is emitted
+   after @tailwind utilities and wins against every text-* utility —
+   which is how <p class="u-label text-accent"> silently rendered
+   the wrong colour. Layered, a utility overrides it. */
+@layer components {
+  .u-label {
+    @apply font-mono text-[12px] font-medium uppercase tracking-[0.09em] text-brand-soft;
+  }
+
+  /* --brand-soft is a light-ground colour; on the ink ground it
+     measures under 3:1 and the label vanishes. The inverted body tone
+     reads as the same quiet register and clears 4.5:1 comfortably. */
+  .on-deep .u-label {
+    color: rgb(var(--ink-invert-soft) / 0.8);
+  }
+}
+
+/* Buttons: pressed state everywhere, no hover lifts */
+.btn-press {
+  @apply transition-colors duration-150 active:translate-y-px;
+}
+
+/* Bullet list: an accent seam tick instead of a disc */
+.ticks li {
+  @apply relative pl-5 text-base;
+}
+
+.ticks li::before {
+  content: "";
+  @apply absolute left-0 top-[9px] h-[3px] w-[9px] bg-accent;
+}
+
+/* The same list, marked as an exclusion rather than an inclusion —
+   used for "what we don't do" beside "what we do". A muted rule, not a
+   red cross: these are boundaries, not failures. */
+.ticks-muted li {
+  @apply relative pl-5 text-base;
+}
+
+.ticks-muted li::before {
+  content: "";
+  @apply absolute left-0 top-[11px] h-px w-[9px] bg-ink-faint;
+}
+
+.on-deep .ticks-muted li::before {
+  @apply bg-ink-invert-soft/50;
+}
+
+/* The rib field. Vertical hairlines at --rib pitch, masked top and
+   bottom so the band reads as a surface catching light rather than as
+   a striped background. The same rhythm as the SeamMark. */
+.seam-field::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(var(--accent) / 0.16) 0 1px,
+    transparent 1px var(--rib)
+  );
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 62%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 62%, transparent 100%);
+  opacity: 0.7;
+  pointer-events: none;
+}

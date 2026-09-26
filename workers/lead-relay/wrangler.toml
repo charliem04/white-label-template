@@ -1,0 +1,224 @@
+name = "client-lead-relay"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+
+# ── The lead book ────────────────────────────────────────────────────
+# Create once:  npx wrangler d1 create client-leads
+# then paste the id it prints here and apply the schema:
+#   npm run schema
+#
+# This database holds names, phone numbers, addresses and the text of
+# what people wrote. Treat it as customer data: no public read path is
+# exposed by the Worker, and /export.csv requires a bearer token.
+[[d1_databases]]
+binding = "DB"
+database_name = "client-leads"
+database_id = "<paste the id `wrangler d1 create` prints>" # TODO(client)
+
+# ── The résumé bucket, read side ─────────────────────────────────────
+# The careers Worker (workers/careers-upload) owns the write side of
+# this bucket and keeps it. This binding is READ-ONLY BY CONVENTION —
+# R2 has no read-only binding to declare, so what enforces it is that
+# nothing in src/index.ts calls put(), delete() or list(); only get(),
+# from GET /resume/:leadId. Keep it that way: a relay that can delete a
+# résumé is a relay that can break the retention audit trail.
+#
+# The bucket MUST STAY PRIVATE. Do not connect a custom domain and do
+# not enable the r2.dev public URL. The privacy policy tells applicants
+# their CV sits somewhere "only we can reach", and that sentence is what
+# this comment protects. Reaching a file through an Access-gated Worker
+# route keeps it true; a public bucket does not.
+[[r2_buckets]]
+binding = "RESUMES"
+bucket_name = "client-resumes"
+
+# ── The retry sweep ──────────────────────────────────────────────────
+# Every fifteen minutes, push anything the CRM has not accepted yet.
+# This is what makes a CRM outage a late delivery rather than a lost
+# lead, and it is the reason the forward on the request path is allowed
+# to fail quietly.
+[triggers]
+crons = ["*/15 * * * *"]
+
+[vars]
+# Exact scheme+host, comma separated. No wildcards, no trailing slash.
+#
+# Add the preview host (`npm run preview:deploy`) while pitching, and TAKE
+# IT OUT AT CUTOVER. A preview origin left in this list after launch is a
+# second site that can post leads into the real table.
+#
+# This list is the one place a preview deployment differs from production in
+# a way that is INVISIBLE from the front of the site: /lead answers an origin
+# that is not here with a 403, and the contact form fires that request
+# un-awaited with a .catch() (see lib/submitContact.ts), so the visitor still
+# sees success, the Web3Forms email still arrives, and the row simply never
+# exists. Nothing on the page says so.
+#
+# IT MUST BE THE STABLE ALIAS, NOT THE URL WRANGLER PRINTS. A deploy prints
+# its per-deployment hash first — https://b93c903c.client-preview.pages.dev —
+# and that hash changes every single deploy, so pinning it here works once
+# and then fails silently forever after. There are no wildcards. The stable
+# alias is the project's own hostname, https://client-preview.pages.dev, which
+# is also listed beside the hash under Pages -> client-preview -> Deployments.
+#
+# Whichever you use, browse the site from THAT hostname when testing: the
+# browser sends the URL the page was loaded from as Origin, so opening the
+# hash URL and submitting the form is refused no matter what is in this list.
+ALLOWED_ORIGINS = "" # TODO(client) — e.g. "https://www.example.com,https://example.com"
+RATE_LIMIT_PER_HOUR = "10"
+
+# ── Which CRM, and which rows ────────────────────────────────────────
+# CRM_ADAPTER picks how leads are forwarded. Unset means "generic": the
+# flat JSON POST to CRM_WEBHOOK_URL that a Zapier catch hook or a
+# no-code mapper wants. "hubspot" talks to HubSpot's CRM Objects API
+# directly and reads CRM_AUTH_TOKEN as the service key — the
+# See src/crm/hubspot.ts for exactly what it posts.
+#
+# A value that is neither is treated as no CRM at all rather than
+# silently falling back, so a typo parks leads as 'disabled' instead of
+# posting them somewhere unintended. Fix the spelling and the next sweep
+# delivers the backlog.
+#
+
+# TODO(client): leave this commented out until a CRM is chosen. Unset
+# means the generic adapter, and with no CRM_WEBHOOK_URL set that means
+# rows are stored 'disabled' — captured, and delivered in full by the
+# retry sweep the moment a CRM is configured. That is a SUPPORTED state,
+# not a half-finished one, and it is the correct state on day one.
+# CRM_ADAPTER = "hubspot"
+
+#
+# Job applications are NOT forwarded to a CRM that honours this setting
+# (HubSpot does; the generic webhook takes both kinds as it always has).
+# A sales contact list is not an applicant tracker: applicants distort
+# every "here are your leads" view, spend the same contact allowance as
+# customers, and carry a different retention promise. They are stored in
+# D1 and in /export.csv either way.
+#
+# CRM_FORWARD_APPLICATIONS = "true"
+
+# This Worker's own public origin — scheme and host, no trailing slash.
+# It is what turns a lead into a clickable résumé link in the CRM:
+# RELAY_PUBLIC_ORIGIN + /resume/<lead id>.
+#
+# A variable rather than something read off the incoming request,
+# because forward() also runs from the cron retry sweep, where there is
+# no request to read. Unset, rows still forward and still carry
+# resumeKey — they just arrive with no link, and the Worker log says so
+# on every one.
+#
+# MUST be the hostname the Cloudflare Access application covers. Point
+# it at a *.workers.dev address and the links in the CRM bypass the
+# sign-in, which is the one mistake this whole route is shaped to avoid.
+RELAY_PUBLIC_ORIGIN = "" # TODO(client) — e.g. https://relay.example.com
+
+# Adding a CRM is one file in src/crm/ and one line in its registry.
+# CRM_ADAPTER = "generic"
+
+# ── Secrets — set with `wrangler secret put`, never in this file ─────
+#
+#   wrangler secret put INGEST_SECRET    <- REQUIRED for /application
+#   wrangler secret put EXPORT_TOKEN     <- REQUIRED for /export.csv
+#   wrangler secret put CRM_WEBHOOK_URL  <- the "generic" adapter's target
+#   wrangler secret put CRM_AUTH_TOKEN   <- service key; REQUIRED by "hubspot"
+#   wrangler secret put CRM_APPLICATION_WEBHOOK_URL  <- optional: send applicants elsewhere
+#
+# INGEST_SECRET is shared with the careers Worker, which sends job
+# applications here server-to-server. Both sides must carry the same
+# value; set it there with the same command.
+#
+# An unconfigured CRM is a SUPPORTED state, not a half-finished one —
+# whether that means no CRM_WEBHOOK_URL on the generic adapter or no
+# CRM_AUTH_TOKEN on HubSpot. Leads are stored with crm_status='disabled'
+# and nothing is lost: setting the secret later makes the next retry
+# sweep deliver the whole backlog. That is the point of the relay.
+#
+# EXPORT_TOKEN gates the CSV, which is one of the two ways data leaves
+# this Worker. With it unset, /export.csv refuses everything rather than
+# serving a CSV of customer records to anyone who guesses the path. The
+# other way out is GET /resume/:leadId, gated by Cloudflare Access — see
+# the Access note below.
+#
+# CRM_APPLICATION_WEBHOOK_URL is optional and sends kind='application'
+# rows somewhere other than CRM_WEBHOOK_URL. Unset, applications follow
+# the leads, which is the previous behaviour exactly. Set it once a real
+# CRM is live: job applicants in a sales CRM's contact list burn a free
+# tier's contact cap, and they carry retention obligations a customer
+# does not — the site promises their file is deleted in twelve months,
+# and that promise only covers storage we control.
+#
+# It is a secret rather than a var for the same reason CRM_WEBHOOK_URL
+# is: a HubSpot submit URL has the portal and form ids in the path, and
+# an inbound webhook URL is usually the whole credential.
+
+# ── Cloudflare Access on /resume/* ───────────────────────────────────
+# GET /resume/:leadId streams a job applicant's CV. It has NO code-level
+# auth, on purpose: the office reaches it by clicking a link in a CRM
+# record, and a browser following a link cannot send an Authorization
+# header — so a token there would be a token in the URL, which is a
+# credential sitting in every CRM record and browser history that ever
+# touched the lead.
+#
+# A Cloudflare Access application in front of the route does the job
+# with no code: free up to 50 users, authenticating against a Google
+# Workspace or any other IdP Access supports.
+#
+# Two things have to be true for that to hold, and neither is visible
+# from inside this Worker:
+#
+#   1. An Access application covers <host>/resume (and so /resume/*).
+#   2. There is no OTHER hostname serving this same code. Access binds
+#      to hostnames on a zone; a *.workers.dev address is not on the
+#      zone and is not covered. Uncomment the route block below and set
+#      workers_dev = false at the same time as creating the
+#      application, or the gate has a door beside it.
+#
+# Do NOT put Access in front of /lead or /application. /lead is posted
+# to by a visitor's browser and /application by the careers Worker,
+# server to server; an Access sign-in page in front of either breaks the
+# form for everyone and every application silently 302s into HTML.
+# Those two already have their own origin gate and shared secret.
+#
+# [[routes]]
+# pattern = "relay.example.com/*"   # TODO(client)
+# zone_name = "example.com"       # TODO(client)
+#
+# workers_dev = false
+
+# ── Optional: the per-IP backstop limiter ────────────────────────────
+# Create with `wrangler kv namespace create RELAY_RATE`, then paste the
+# id here and uncomment. Without it, overRateLimit() is a no-op and the
+# public /lead route relies on a WAF rule instead — which is the better
+# place for it anyway, since it stops the request before it bills.
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT"
+# id = "<paste the id wrangler prints>"
+
+# ── Local development ────────────────────────────────────────────────
+# NOTE: a named environment does NOT inherit top-level bindings, only
+# top-level `main`/`name`. Every binding the Worker reads has to be
+# repeated here or env.DB arrives undefined and every request fails at
+# the insert with a 500. Same applies to any future [env.staging].
+[env.dev.vars]
+ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:4173"
+RATE_LIMIT_PER_HOUR = "1000"
+# So a locally forwarded lead carries a résumé link that resolves
+# against the dev server rather than production.
+RELAY_PUBLIC_ORIGIN = "http://localhost:8787"
+CRM_ADAPTER = "generic"
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "client-leads-dev"
+database_id = "client-leads-dev"
+
+# A separate dev bucket, so nothing local can read a real applicant's
+# CV. Seed it by running the careers Worker's own dev server, which
+# writes to client-resumes-dev.
+[[env.dev.r2_buckets]]
+binding = "RESUMES"
+bucket_name = "client-resumes-dev"
+
+[[env.dev.kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "relay-dev-kv"

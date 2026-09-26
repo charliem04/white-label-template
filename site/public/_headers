@@ -1,0 +1,64 @@
+# Cloudflare Pages response headers.
+# Rules are matched in order; the most specific match wins per header.
+
+/*
+  # Don't let a browser guess a MIME type we didn't send.
+  X-Content-Type-Options: nosniff
+  # Send the origin to other sites, the full path only to ourselves.
+  Referrer-Policy: strict-origin-when-cross-origin
+  # Nothing here should ever be framed by anyone else. The CSP that
+  # scripts/csp.mjs generates carries frame-ancestors too; this stays as
+  # the older-browser equivalent. Two Content-Security-Policy headers on
+  # one path are enforced as an intersection, which is confusing to
+  # reason about, so this file no longer sets one — the generated policy
+  # owns CSP entirely.
+  X-Frame-Options: DENY
+  # Features this site has no business asking for.
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  # After one visit over HTTPS, the browser refuses to try plain HTTP for
+  # a year. That closes the gap this site otherwise has every time
+  # somebody types "example.com" into the bar: the first request goes out
+  # unencrypted and is redirected, and anything on the path between can
+  # answer it first and serve a convincing fake instead.
+  #
+  # ── WHY THERE IS NO includeSubDomains ──────────────────────────────
+  #
+  # It was here and was taken back out. That directive extends the same
+  # promise to every subdomain — mail., cpanel., whatever a vendor set
+  # up years ago — and a browser that has seen it will refuse plain HTTP
+  # to those hosts for a year with no way to take it back early. Nobody
+  # has audited what lives under this domain, and the two hostnames that
+  # actually matter, example.com and www.example.com, are both served by
+  # this Pages project and both get the header directly.
+  #
+  # So this protects exactly what it can verify. If the subdomains are
+  # ever audited and all of them are HTTPS, adding includeSubDomains is
+  # a one-word change — and worth making, in that order.
+  #
+  # `preload` is a separate and much larger commitment: it hard-codes
+  # the domain into browsers themselves and takes months to undo. Not
+  # something to set on a client's behalf without asking.
+  Strict-Transport-Security: max-age=31536000
+
+# Next's build output is content-hashed, so a given URL's bytes never
+# change. Cache it hard and forever.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Photography is NOT hashed — replacing a job photo reuses its filename.
+# A day of browser cache with revalidation after that, so a swapped
+# photo appears within a day rather than never.
+/brand/*
+  Cache-Control: public, max-age=86400, must-revalidate
+
+/icon.png
+  Cache-Control: public, max-age=86400, must-revalidate
+
+# The Content-Security-Policy is NOT here — scripts/csp.mjs generates it
+# at build time and appends it to the copy of this file in out/. It has
+# to be generated because some of the origins it allows are only known
+# from the build environment: the careers Worker, the CRM webhook.
+#
+# That script also fails the build if the output references an origin
+# the policy does not cover, so adding an embed forces a decision rather
+# than silently escaping the policy.

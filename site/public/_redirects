@@ -1,0 +1,20 @@
+# Cloudflare Pages redirects. One rule per line: from, to, status.
+#
+# ⚠️ BEFORE THE DNS CUTOVER: the old example.com site has URLs that are
+# indexed by Google and linked from Facebook. Every one that does not
+# exist on this site needs a line here, or those links start returning
+# 404 the moment DNS moves and the ranking they carry is thrown away.
+#
+# How to build the list: crawl the live site (or export its sitemap)
+# while it is still up, then map each URL to its nearest equivalent
+# below. This file is the one launch task that gets harder to do after
+# launch, not easier.
+
+# Known so far — the old financing page.
+/new-page-1  /financing/  301
+
+# Likely shapes worth confirming against the old site before cutover:
+# /services      /services/      301
+# /contact       /contact/       301
+# /gallery       /gallery/       301
+# /about         /#about         301

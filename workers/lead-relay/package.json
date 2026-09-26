@@ -1,0 +1,19 @@
+{
+  "name": "client-lead-relay",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "wrangler dev --env dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/*.test.ts\"",
+    "schema": "wrangler d1 execute client-leads --remote --file=schema.sql",
+    "schema:local": "wrangler d1 execute DB --local --env dev --file=schema.sql",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250801.0",
+    "typescript": "^5.6.0",
+    "wrangler": "^3.90.0"
+  }
+}

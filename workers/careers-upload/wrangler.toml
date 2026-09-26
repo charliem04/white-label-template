@@ -1,0 +1,91 @@
+name = "client-careers-upload"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+
+# ── R2 ───────────────────────────────────────────────────────────────
+# This bucket must stay PRIVATE. Do not connect a custom domain to it
+# and do not enable the r2.dev public URL — it holds strangers' names,
+# phone numbers and CVs.
+#
+# THIS Worker only ever writes; it has no read path and is not getting
+# one. Reading happens in two places, neither of them here:
+#
+#   - the lead relay's GET /resume/:leadId, which has its own read-only
+#     binding on this bucket and is gated by Cloudflare Access. That is
+#     the path the office uses: a link on the CRM record.
+#   - the R2 dashboard, or `wrangler r2 object get`, for support and for
+#     anything the relay cannot answer.
+#
+# Both reach the file through something that authenticates a person.
+# Neither makes the bucket public, which is what keeps the privacy
+# policy's "only we can reach it" true.
+[[r2_buckets]]
+binding = "RESUMES"
+bucket_name = "client-resumes"
+
+[vars]
+# Exact scheme+host, comma separated. No wildcards, no trailing slash.
+#
+# Add the preview host while pitching and TAKE IT OUT AT CUTOVER. Use the
+# project's stable alias, not the per-deployment hash URL a deploy prints,
+# which changes every time. The same note on the relay's ALLOWED_ORIGINS has
+# the longer version.
+ALLOWED_ORIGINS = "" # TODO(client) — e.g. "https://www.example.com,https://example.com"
+MAX_UPLOAD_BYTES = "5242880"   # 5 MB
+RATE_LIMIT_PER_HOUR = "5"
+
+# How long the raw submitting IP survives in KV. The résumé itself is
+# kept for 365 days by the R2 lifecycle rule (npm run retention); the
+# address that sent it is only useful for a few weeks of abuse
+# investigation, so it goes first. Requires the KV namespace below.
+IP_RETENTION_DAYS = "30"
+
+# ── Secrets — set with `wrangler secret put`, never in this file ─────
+#   wrangler secret put TURNSTILE_SECRET   <- REQUIRED
+#   wrangler secret put NOTIFY_WEBHOOK
+#   wrangler secret put IP_HASH_SALT       <- any long random string
+#
+# IP_HASH_SALT is what lets the bucket record "these uploads came from
+# one place" without recording where that place is. Unset, no
+# IP-derived value is stored on the object at all: an unsalted hash of
+# an IPv4 address is a lookup table away from being the address.
+#
+# TURNSTILE_SECRET is the only layer that tells a person from a script.
+# It is required: with it unset the Worker refuses every upload and
+# tells applicants to email the office, rather than quietly running
+# open to anyone who can send a valid PDF. The KV limiter below is a
+# backstop, not a substitute.
+
+# ── Optional: the per-IP backstop limiter ────────────────────────────
+# Create with `wrangler kv namespace create RATE_LIMIT`, then paste the
+# id here and uncomment. Without it, overRateLimit() is a no-op.
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT"
+# id = "<paste the id wrangler prints>"
+
+# ── Local development ────────────────────────────────────────────────
+# NOTE: a named environment does NOT inherit top-level bindings, only
+# top-level `main`/`name`. Every binding the Worker reads has to be
+# repeated here or env.RESUMES arrives undefined and every upload fails
+# at the R2 put with a 502. Same applies to any future [env.staging].
+[env.dev.vars]
+ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:4173"
+MAX_UPLOAD_BYTES = "5242880"
+RATE_LIMIT_PER_HOUR = "50"
+# Local only — there is no Turnstile widget to solve against a dev
+# server. Never set this on the deployed Worker: it is the difference
+# between a gated endpoint and an open one.
+ALLOW_INSECURE_NO_CAPTCHA = "true"
+IP_RETENTION_DAYS = "30"
+# Dev-only salt. The real one is a secret, never a var.
+IP_HASH_SALT = "dev-only-salt"
+
+[[env.dev.r2_buckets]]
+binding = "RESUMES"
+bucket_name = "client-resumes-dev"
+
+# Local KV so the rate limiter and the short-lived raw-IP store are
+# actually exercised in dev rather than silently skipped.
+[[env.dev.kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "careers-dev-kv"

@@ -4,7 +4,12 @@
     {
       "name": "white-label-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "white-label-template", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "site",
+        "run",
+        "dev"
+      ],
       "port": 3000
     }
   ]
