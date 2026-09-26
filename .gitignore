@@ -9,3 +9,6 @@ dist/
 
 # Claude Code session worktrees
 .claude/worktrees/
+
+# JetBrains IDE settings
+.idea/
