@@ -23,7 +23,7 @@ do when something goes wrong.
 The photographs live in a Sanity project. Publishing in the studio fires
 a webhook at a Cloudflare Pages **deploy hook**, which rebuilds the
 site; the build fetches the published gallery, writes it into
-`client-site/content/gallery.generated.json`, and renders it. The images
+`site/content/gallery.generated.json`, and renders it. The images
 themselves are served from Sanity's CDN at a size and crop the build
 asks for, so a 12MB phone photo is no longer a 12MB download.
 
@@ -89,7 +89,8 @@ appears in the URL of every photograph the site serves.
 
 ### 2. Configure and deploy the studio
 
-The studio is in `studio/` in this repository.
+The studio lives in `studio/` once you have added one (see the note at
+the top of this file).
 
 ```bash
 cd studio
@@ -151,7 +152,7 @@ Until `SANITY_PROJECT_ID` is set, the build uses the committed
 correct; it just cannot see anything published since that file was
 written.
 
-> **On the terminal preview:** put these in `client-site/.env.local`
+> **On the terminal preview:** put these in `site/.env.local`
 > instead, alongside `NEXT_PUBLIC_WEB3FORMS_KEY`. The build runs on your
 > machine, so that file is where it looks.
 >
@@ -372,7 +373,7 @@ snapshot, which is why this is easy to miss.
 
 **The same line from `npm run preview:deploy`.** Different cause: that
 build runs on your machine, so the value is missing from
-`client-site/.env.local` and setting it in Cloudflare will not help.
+`site/.env.local` and setting it in Cloudflare will not help.
 Check that the line has a value and not just the empty `SANITY_PROJECT_ID=`
 that `.env.example` ships. Step 4.
 
@@ -385,30 +386,3 @@ studio's crop tool and publish. The grid's 4:3 crop is taken around it.
 **Someone needs access.** sanity.io/manage → the project → **Members** →
 *Invite*. Removing someone there removes their access to the gallery in
 the same motion.
-
----
-
-## Retiring the old path
-
-If the previous editor was ever deployed, these should no longer exist:
-
-- The `sveltia-cms-auth` Cloudflare Worker. Delete it. It holds a live
-  GitHub OAuth client secret and nothing uses it.
-- Its **GitHub OAuth app** (GitHub → Settings → Developer settings →
-  OAuth Apps). Delete it, which revokes the secret.
-- The `CMS_AUTH_URL` variable in Cloudflare Pages. Remove it.
-- Repository write access granted to editors *only* so they could sign
-  in to `/admin/`. Review and remove.
-
-`public/admin/` and `scripts/cms.mjs` are already gone from this
-repository, and `/admin/` now returns a 404.
-
-The forty photographs as the old CMS held them are preserved at
-`studio/import/gallery.migration.json`, and before that in this
-repository's history as `client-site/content/gallery.json`. Once the
-import has been run and the gallery is live from Sanity, that file and
-`studio/scripts/import-gallery.mjs` can be deleted — git keeps them.
-
-The original image files are still in `client-site/public/brand/`. Leave
-them until the gallery has been serving from Sanity for a while: they
-are the only local copies, and they are what the import script reads.

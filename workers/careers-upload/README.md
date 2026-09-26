@@ -62,7 +62,7 @@ npm run retention
 
 Then put the deployed URL in the site's `NEXT_PUBLIC_CAREERS_ENDPOINT`,
 rebuild the site, and flip `/careers/` to `live: true` in
-`client-site/lib/routes.ts`.
+`site/lib/routes.ts`.
 
 ## Configuration
 

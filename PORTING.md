@@ -142,7 +142,9 @@ one), areas, team, reviews, case studies, financing, video, insurance, storm;
 `Hero`, `MetalSpec`, `Process`, `Brands`, `About`, `Testimonials`,
 `ServiceCards`, `OtherServices`, `StormStrip`, `StormRadar`, `StormWarnings`,
 `FinanceProducts`, `PaymentEstimator`, `RoleCards`, `GoogleReviews`,
-`ReviewColumns`, `CaseStudyArticle`, `BeforeAfter`.
+`ReviewColumns`, `CaseStudyArticle`, `BeforeAfter`. (The `Hero`, `About`
+and `Testimonials` in this repo are the template's own, built fresh — see
+the note at the top.)
 
 Also left behind: `lib/nwsRadar.ts` (607 lines), `lib/radarBasemap.ts`,
 `scripts/radar-basemap.mjs`, `lib/googleReviews.ts`. All four are good code and
@@ -195,9 +197,10 @@ Ordered by how expensive the mistake is.
    that Access does not cover leaves job applicants' CVs reachable by anyone
    holding the URL.
 
-6. **Align the three category lists.** `content/types.ts`,
-   `content/gallery.ts` and `studio/schemas/galleryCategories.ts`.
-   `npm run gallery` fails the build if they disagree, so you will find out.
+6. **Align the category lists.** `content/types.ts` and
+   `content/gallery.ts` — plus `studio/schemas/galleryCategories.ts` once a
+   studio is added. `npm run gallery` fails the build if they disagree, so
+   you will find out.
 
 7. **Decide on the fonts.** `app/layout.tsx` imports and the `--font-*` stacks in
    `globals.css` must change together. `scripts/fonts.mjs` follows the imports
@@ -244,17 +247,15 @@ Ordered by how expensive the mistake is.
 
 Stated plainly rather than discovered later:
 
-- **`app/page.tsx` is scaffolding**, not a home page. It renders the gallery
-  band, the contact band and the closing CTA, and the comment in it describes
-  the band order that worked. The hero and the argument bands are yours.
 - **`content/services.ts` has one example service**, typed and complete, meant
   to be copied and then deleted.
 - **No `/careers/` page is shipped**, though `CareersForm`, `content/careers.ts`
   and the upload Worker all are. The route is `live: false`; build the page and
   flip the flag.
-- **No images.** `public/brand/` does not exist yet; every `src` in the config
-  and the content skeletons points into it.
-- **`studio/` ships schemas and config only** — no `dist/`, and its
-  `sanity.config.ts` needs a real project id.
+- **Placeholder images only.** `public/brand/` holds labelled SVG
+  stand-ins; every `src` in the config and the content skeletons points
+  into it. Swap in the client's photos.
+- **No `studio/` ships.** The gallery builds from the committed
+  `content/gallery.generated.json`; `docs/GALLERY-CMS.md` covers adding one.
 - **The 555 numbers and `example.com` are everywhere on purpose.** `npm run
   check` will tell you where.

@@ -314,7 +314,7 @@ It is not integration testing — the first real lead through a real
 portal is still what proves the property names.
 
 The résumé route and the adapters were added later, and D1 is still
-unprovisioned (see `docs/PRODUCTION-READINESS.md`, finding 1), so those
+unprovisioned, so those
 were driven against **stub D1 and R2 bindings** rather than the real
 ones — the module's own `fetch` and `scheduled` handlers, called
 directly, with `fetch()` captured to see what a CRM would have received:

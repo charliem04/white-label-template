@@ -10,7 +10,7 @@ file covers the whole of it: getting the key, proving it works, proving it
 *fails honestly*, and what to do when the inbox goes quiet.
 
 Everything Web3Forms-specific is one variable and one file:
-`NEXT_PUBLIC_WEB3FORMS_KEY`, read by `client-site/lib/submitContact.ts`.
+`NEXT_PUBLIC_WEB3FORMS_KEY`, read by `site/lib/submitContact.ts`.
 
 ---
 
@@ -157,8 +157,7 @@ caught. That stops naive scripted spam and nothing else.
 
 In the Web3Forms dashboard, switch on their spam protection. They offer their
 own filtering and a captcha option; the menu names move, so trust the
-dashboard over this paragraph. `PRODUCTION-READINESS.md` finding 6 is open
-until this is done.
+dashboard over this paragraph.
 
 If spam gets past it, the order of escalation is: their spam protection →
 rotate the key (section 8) → a captcha on the form. Do not reach for the last
@@ -290,9 +289,9 @@ the file's header comment says so, and it is not a formality.
 
 | | |
 | --- | --- |
-| The variable, and every other one | `client-site/.env.example` |
-| The code, and why it is shaped this way | `client-site/lib/submitContact.ts` |
-| The form itself | `client-site/components/Contact.tsx` |
+| The variable, and every other one | `site/.env.example` |
+| The code, and why it is shaped this way | `site/lib/submitContact.ts` |
+| The form itself | `site/components/Contact.tsx` |
 | Who creates the account | `docs/LAUNCH-CREDENTIALS.md` §2 |
 | The second copy of the lead | `workers/lead-relay/README.md` |
 | The pre-cutover checklist | `README-DEPLOY.md` §3 |

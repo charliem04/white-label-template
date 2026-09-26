@@ -167,5 +167,3 @@ curl -H "Authorization: Bearer $EXPORT_TOKEN" https://<relay>/export.csv -o lead
   short screen recording is worth more here than a document.
 - Schedule a recurring `export.csv` pull as a backup. Gallery content is
   already safe in git; the lead book is not.
-- Re-read the Facebook reviews snapshot in `content/reviews.ts` and update its
-  printed capture date. There is no feed that will do it for you.

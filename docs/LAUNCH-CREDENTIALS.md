@@ -1,7 +1,7 @@
 # Launch credentials — what has to exist, and who creates it
 
 One page, for the working session. Every variable named here is already
-documented in `client-site/.env.example`, `workers/lead-relay/README.md` or
+documented in `site/.env.example`, `workers/lead-relay/README.md` or
 `workers/careers-upload/README.md`; this file is the *acquisition* order, not
 the configuration reference.
 

@@ -12,7 +12,7 @@
 #   2. RETENTION_DAYS in src/index.ts (stamped on each object as
 #      `retainUntil`, so an object says when it should be gone)
 #   3. the "How long we keep it" section of the site's privacy policy,
-#      in client-site/app/privacy/page.tsx
+#      in site/app/privacy/page.tsx
 #
 # The site tells applicants a number. This is what makes it true.
 
