@@ -10,9 +10,6 @@
 # below. This file is the one launch task that gets harder to do after
 # launch, not easier.
 
-# Known so far — the old financing page.
-/new-page-1  /financing/  301
-
 # Likely shapes worth confirming against the old site before cutover:
 # /services      /services/      301
 # /contact       /contact/       301
