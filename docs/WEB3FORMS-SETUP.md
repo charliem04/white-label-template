@@ -294,4 +294,4 @@ the file's header comment says so, and it is not a formality.
 | The form itself | `site/components/Contact.tsx` |
 | Who creates the account | `docs/LAUNCH-CREDENTIALS.md` §2 |
 | The second copy of the lead | `workers/lead-relay/README.md` |
-| The pre-cutover checklist | `README-DEPLOY.md` §3 |
+| The pre-cutover checklist | `README-DEPLOY.md` §9 |

@@ -35,17 +35,7 @@ be taken down by a database.
 
 The generated file is committed to git, which means the gallery still
 has an author, a timestamp and a diff for every change, and would
-survive the Sanity project being lost. That was the best thing about the
-CMS this replaced and it did not have to be given up.
-
-### Why this replaced the old editor
-
-The gallery used to be edited at `example.com/admin/` by a git-backed CMS
-that committed straight to this repository. It worked, and it is gone
-for one reason: signing in meant a **GitHub account with write access to
-the repository, per editor**. That is a real thing to ask of a small
-office, and the gallery went unedited because of it. A Sanity account is
-an email invite.
+survive the Sanity project being lost.
 
 ---
 
@@ -55,11 +45,11 @@ About half an hour, once.
 
 > ### Which deployment are you on?
 >
-> This matters from step 4 onward, because the two are configured in
+> This matters from step 3 onward, because the two are configured in
 > completely different places.
 >
 > **A Git-connected Pages project** — Cloudflare clones the repo and runs
-> the build itself. Steps 4 to 6 below are written for this, and it is
+> the build itself. Steps 3 to 5 below are written for this, and it is
 > what example.com will be after the domain migration.
 >
 > **The terminal preview** — `npm run preview:deploy`, which is
@@ -103,28 +93,7 @@ npm run deploy              # publishes to <hostname>.sanity.studio
 `npm run deploy` asks for a hostname the first time. `client-site` gives
 `https://client-site.sanity.studio`, which is the URL the office uses.
 
-### 3. Import the forty photographs
-
-Only for a new, empty project. This is the one-off that moves the
-existing gallery in, with its alt text exactly as it was written.
-
-```bash
-cd studio
-# add SANITY_IMPORT_TOKEN to .env — sanity.io/manage → API → Tokens,
-# Editor role
-npm run import -- --dry-run   # lists what it would upload
-npm run import
-```
-
-It refuses to run if the gallery already has photos in it, so it cannot
-quietly overwrite a month of edits.
-
-Then **delete the token** from `.env` and revoke it at sanity.io/manage.
-It is a write credential and the import is over.
-
-Open the studio, check the order, press **Publish**.
-
-### 4. Tell the site where the gallery is
+### 3. Tell the site where the gallery is
 
 In **Cloudflare Pages → the `client-site` project → Settings →
 Environment variables**, for **Production and Preview both**:
@@ -176,7 +145,7 @@ written.
 > path: no `SANITY_READ_TOKEN`, so no read credential to leak into a
 > build you are iterating on.
 
-### 5. Wire Publish to a rebuild
+### 4. Wire Publish to a rebuild
 
 Two halves. Both are needed, and the gap between them is the single most
 common reason for "I published and nothing happened".
@@ -231,7 +200,7 @@ keystroke fires a build, and Cloudflare's build minutes are finite.
 Drafts off matters for the same reason: an editor saving as they type
 should not be deploying as they type.
 
-### 6. Check it end to end
+### 5. Check it end to end
 
 Change a caption in the studio, press Publish, and watch:
 
@@ -253,7 +222,7 @@ problem — see Troubleshooting.
 >
 > 1. The output shows `[gallery] fetched 40 photos from sanity:…`. If it
 >    says `SANITY_PROJECT_ID is not set — using the committed gallery`
->    instead, the export did not take: re-read the note in step 4.
+>    instead, the export did not take: re-read the note in step 3.
 > 2. `git diff content/gallery.generated.json` shows your caption, and
 >    the `source` line no longer starting `migration:`. **Commit it** —
 >    that file is what gives the gallery a history and what the build
@@ -357,7 +326,7 @@ recoverable, a broken `/gallery/` during a storm week is not.
 
 ## Troubleshooting
 
-**Published, and nothing happened.** Work through step 6 above in order.
+**Published, and nothing happened.** Work through step 5 above in order.
 The webhook delivery log is the first place to look: no delivery means
 the filter is wrong or the trigger is off; a delivery with a 4xx means
 the deploy hook URL is wrong or was regenerated.
@@ -375,7 +344,7 @@ snapshot, which is why this is easy to miss.
 build runs on your machine, so the value is missing from
 `site/.env.local` and setting it in Cloudflare will not help.
 Check that the line has a value and not just the empty `SANITY_PROJECT_ID=`
-that `.env.example` ships. Step 4.
+that `.env.example` ships. Step 3.
 
 **`Sanity returned 403`.** The dataset is private and
 `SANITY_READ_TOKEN` is missing, wrong, or was revoked.

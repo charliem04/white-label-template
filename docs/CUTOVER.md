@@ -79,7 +79,7 @@ around them.
       config. It belongs to `[env.dev.vars]` only. It is the one value where a
       copy-paste turns a gated endpoint into an open one.
 - [ ] Confirm the R2 bucket is private — no custom domain, no r2.dev URL.
-- [ ] Full preview verification per `README-DEPLOY.md` §3, including the check
+- [ ] Full preview verification per `README-DEPLOY.md` §9, including the check
       most people skip: **submit the contact form with a deliberately wrong
       key and confirm the visitor sees the failure and the phone number, not a
       false success.**
