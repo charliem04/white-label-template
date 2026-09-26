@@ -72,3 +72,15 @@ In rough order of how long each takes:
 
 `tailwind.config.ts` maps every colour utility onto the CSS variables in
 `globals.css`, so it should not need editing per client.
+
+## Shipped but not mounted
+
+Some code has no importer on purpose — it is kit, ready for the page
+that needs it, not dead code:
+
+- **Motion and UI primitives:** `BandTransition`, `BeforeAfterSlider`,
+  `DrawRule`, `Mark`, `Pending`, `PinnedSteps`, `Stars` in
+  `site/components/`.
+- **Careers:** `CareersForm`, `Turnstile`, `lib/submitApplication.ts` and
+  `content/careers.ts`, waiting on a `/careers/` page (`live: false` in
+  `lib/routes.ts`). `workers/careers-upload` is its back end.
