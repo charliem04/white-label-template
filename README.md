@@ -55,6 +55,11 @@ Plus `npm run check`, which is not in the build: a static checker for
 inherited-default frontend patterns. Advisory by default, `--strict` to
 make it fail.
 
+**CI** (`.github/workflows/ci.yml`) runs all of it on every pull request
+and every push to `main`: `npm run lint`, `typecheck`, the full `build`
+and `check` for the site, and `typecheck` plus `npm test` for each
+Worker. It needs no secrets.
+
 ## Per-client surface
 
 In rough order of how long each takes:

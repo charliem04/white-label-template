@@ -87,6 +87,9 @@ export const client = {
    * Google Maps embed URL. Maps → Share → Embed a map, and paste ONLY
    * the src attribute value here. Empty string = the map panel is
    * skipped rather than rendering an empty frame.
+   *
+   * INTEGRATIONS.frame in scripts/csp.mjs allows https://www.google.com
+   * for this. With no map, delete that line too.
    */
   mapEmbedSrc: "",
 

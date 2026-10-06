@@ -1,0 +1,74 @@
+# The same gates a person runs locally, on every push to main and every
+# pull request — so a broken build, a dead link, an undeclared CSP
+# origin or a leaked secret fails here rather than on Cloudflare.
+#
+# No secrets are needed: every integration is optional at build time,
+# and the gallery falls back to the committed gallery.generated.json.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  site:
+    name: Site — lint, typecheck, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # The version Cloudflare Pages builds with.
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+      # gallery → next build → csp → fonts → seo → routes → harden.
+      # Any of the five gates failing fails this step.
+      - run: npm run build
+
+      # Advisory: prints placeholder and inherited-default findings
+      # without failing. A client repo that wants it enforced can add
+      # -- --strict.
+      - run: npm run check
+
+  workers:
+    name: Worker — ${{ matrix.worker }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        worker: [lead-relay, careers-upload]
+    defaults:
+      run:
+        working-directory: workers/${{ matrix.worker }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          # npm test runs the TypeScript directly with node --test,
+          # which needs Node's built-in type stripping (22.6+).
+          node-version: 22
+          cache: npm
+          cache-dependency-path: workers/${{ matrix.worker }}/package-lock.json
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test --if-present
