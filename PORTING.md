@@ -22,13 +22,18 @@
 > - **Fixed on the way through:** an empty `urgentPhone` now drops the
 >   urgent line everywhere (Footer, UtilityBar, CtaBand, CallCard,
 >   Contact, and call tracking, which was logging every call as urgent);
->   `PageTransition`'s hardcoded gold now derives from the tokens; the
->   HubSpot custom-property tests filtered on the old `ctl_` prefix and
->   so asserted nothing; a real-looking name and phone number left in
->   the worker tests and comments were replaced; the home gallery band
->   hides when there are no featured photos.
+>   `PageTransition`'s hardcoded gold now derives from the tokens; a
+>   real-looking name and phone number left in the worker tests and
+>   comments were replaced; the home gallery band hides when there are
+>   no featured photos.
+> - **HubSpot removed.** The kit shipped a HubSpot adapter in the lead
+>   relay alongside the generic webhook; it was taken out, with its
+>   runbook and tests. The relay forwards through the generic webhook
+>   only (`CRM_WEBHOOK_URL`), and `src/crm/` keeps the adapter seam for
+>   a CRM API later.
 >
-> The rest of this document is the kit's own record, unchanged.
+> The rest of this document is the kit's own record, unchanged except
+> for the expected test count below and the runbook list.
 
 This directory is an extraction from a finished, deployed Next.js marketing
 site. It is the **infrastructure** of that build with the client removed: the
@@ -45,7 +50,7 @@ cd site && npm install && npm run build
 cd ../workers/lead-relay && npm install && npm test
 ```
 
-Expected: 8 pages, CSP applied, 0 unresolved links, harden clean, 23 tests
+Expected: 8 pages, CSP applied, 0 unresolved links, harden clean, 12 tests
 passing.
 
 ---
@@ -117,7 +122,7 @@ content-hashed. Read that before you "tidy" it.
 | `site/content/types.ts` | Generic `GalleryCategory` union; `parish` → `region`. |
 | `site/app/terms/`, `site/app/privacy/` | **Stubs.** The wiring (noindex from the route registry) is intact and correct. The prose was deliberately *not* carried over — see below. |
 | `workers/*/wrangler.toml` | Real D1 database id, bucket names, origins and `RELAY_PUBLIC_ORIGIN` replaced with `TODO(client)` placeholders. `CRM_ADAPTER` commented out. |
-| `docs/*.md` | Five runbooks de-branded: HubSpot setup, launch credentials, gallery CMS, Web3Forms, cutover. |
+| `docs/*.md` | Runbooks de-branded: launch credentials, gallery CMS, Web3Forms, cutover. |
 
 ### Two bugs found and fixed during extraction
 

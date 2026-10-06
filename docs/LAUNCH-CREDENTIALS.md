@@ -21,10 +21,10 @@ times measured in days.
 |---|---|---|
 | Domain registrar login for example.com | Cutover | Confirm the domain is unlocked and the auth/EPP code is retrievable |
 | **Full DNS record export from the current host** | Cutover | MX, SPF, DKIM, DMARC and any vendor CNAMEs. See the warning below |
-| the client's legal name + EIN | Google Business Profile, any vendor account | |
-| The Google account that owns the Business Profile | Reviews, Search Console, Maps embed | If nobody knows who owns it, start the GBP reclaim process immediately — it takes days |
-| LA contractor licence number | `client.config.ts → badges` | No licence line prints until this exists |
-| Attorney contact | Legal sign-off | Four documents to review; start this first |
+| The client's legal name + EIN | Google Business Profile, any vendor account | |
+| The Google account that owns the Business Profile | Review link, Search Console, Maps embed | If nobody knows who owns it, start the GBP reclaim process immediately — it takes days |
+| Licence / certification numbers, if the trade is licensed | `client.config.ts → badges` | No badge line prints until these exist |
+| Attorney contact | Legal sign-off | Terms, privacy, and the careers questions if `/careers/` will go live; start this first |
 | Current web host + contract end date | Rollback window | Do not cancel until 30 days after cutover |
 
 > ### The one that will actually hurt
@@ -40,23 +40,19 @@ times measured in days.
 ## 2. Created together, in the room
 
 These need the client present (their account, their billing, their decision) but take
-minutes each once he is sitting there.
+minutes each once they are in the room.
 
 | Item | Variable it fills | Without it |
 |---|---|---|
 | Cloudflare account, **in the client's name**, the developer added as a member | — | the client is locked to the developer's personal account. Do this even if it costs an hour |
 | Web3Forms access key for the office inbox | `NEXT_PUBLIC_WEB3FORMS_KEY` | **The contact form refuses to submit** and shows the phone number. The site cannot take a lead. Full runbook: **`docs/WEB3FORMS-SETUP.md`** |
 | Web3Forms spam protection switched on | — | The contact form's only defence today is a honeypot |
-| Google Cloud project → Places API (New) → API key, restricted to HTTP referrers | `NEXT_PUBLIC_GOOGLE_PLACES_KEY` | Reviews band degrades to a link. Harmless, just weaker |
-| **Budget alert on that key, set the same day** | — | This is the only thing on the site that bills per visitor |
-| Place ID, verified against the real listing | `NEXT_PUBLIC_GOOGLE_PLACE_ID` | A wrong ID shows **a different business's reviews under the client's name**. Verify, do not assume |
 | Cloudflare Turnstile site + secret pair | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + Worker secret | The careers Worker refuses every upload rather than running open |
-| Sanity project owned by the client, + a Sanity account invited for each person who edits content | gallery sign-in | An email invite per editor, free on Sanity's starter plan. This replaced a GitHub account with repository write access per editor, which was the friction that kept the gallery unedited |
-| CRM account + its webhook or Zapier/Make URL | `CRM_WEBHOOK_URL` (Worker secret) | Supported blank state: leads still stored, delivered in bulk the first time it is set |
-| **HubSpot free account** + service key, if HubSpot is the demo CRM | `CRM_AUTH_TOKEN` (Worker secret) + `CRM_ADAPTER = "hubspot"` | Same supported blank state. Created in the client's name, not the developer's — this account owns the client's contact database. Full runbook, scopes and the four custom properties: **`docs/HUBSPOT-SETUP.md`** — note that a new portal issues a *service key*, not a private app token, since HubSpot disabled the latter for new accounts on 28 September 2026. Add HubSpot to the privacy policy before the key is set (§6) |
-| Analytics account (Plausible paid / GA4 free) | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | No analytics. Banner still behaves correctly |
+| Sanity project owned by the client, + a Sanity account invited for each person who edits content — **only if a gallery studio is being added** (none ships; `docs/GALLERY-CMS.md`) | gallery sign-in | The gallery builds from the committed `content/gallery.generated.json`. An email invite per editor is free on Sanity's starter plan |
+| CRM account, **in the client's name**, + its inbound webhook or a Zapier/Make catch-hook URL | `CRM_WEBHOOK_URL` (Worker secret), plus `CRM_AUTH_TOKEN` if the target wants a bearer token | Supported blank state: leads still stored, delivered in bulk the first time it is set. Whoever owns the CRM login owns the client's contact database. Name the CRM in the privacy policy before the URL is set (§7) |
+| Plausible account (the only analytics `components/Analytics.tsx` loads) | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | No analytics. Banner still behaves correctly |
 | Call-tracking provider, if adopted | `client.config.ts → tracking.dniScriptUrl` | Every number on the site stays the real one, which is the correct default |
-| Résumé handling decision | `NEXT_PUBLIC_CAREERS_ENDPOINT` | `/careers/` is a **live nav item** — the form refuses and points at email until this is resolved |
+| Résumé handling decision | `NEXT_PUBLIC_CAREERS_ENDPOINT` | `/careers/` ships `live: false` and has no page yet. Resolve this before building the page and flipping the flag — until it is set, the form refuses and points at email |
 | **Who may read a résumé**, and the Google accounts they use | Cloudflare Access policy (§6) | Nobody can open a CV from a CRM record. The file is safe in R2 and reachable with wrangler, which is not a thing the office can do |
 
 ---
@@ -73,10 +69,9 @@ No client involvement. Listed so nothing is forgotten at wiring time.
 | `IP_HASH_SALT` | careers-upload | Unset = no IP-derived value stored at all. Safe, but loses the "same source" signal |
 | `NOTIFY_WEBHOOK` | careers-upload | Point at the relay's `/application` route |
 | `RELAY_PUBLIC_ORIGIN` | lead-relay `[vars]` | The relay's own hostname, and it must be the one Access covers (§6). Unset, forwarded records carry `resumeKey` but no clickable link — and the Worker log says so on every one |
-| `CRM_ADAPTER` | lead-relay `[vars]` | `generic` (default) or `hubspot`. Wrong value = the CRM quietly receives the wrong shape, which is the slowest failure here to notice |
 | `CRM_APPLICATION_WEBHOOK_URL` | lead-relay | Optional. Unset, job applicants land in the sales CRM alongside customers — see §6 for why that is worth avoiding |
 | D1 `database_id` | `workers/lead-relay/wrangler.toml` | **Currently a placeholder string.** `wrangler d1 create client-leads`, paste the real id, `npm run schema` |
-| `SANITY_PROJECT_ID`, `SANITY_DATASET` | Pages build env | Public identifiers, in every gallery photo URL. Build-time only |
+| `SANITY_PROJECT_ID`, `SANITY_DATASET` | Pages build env | Only once a gallery studio exists. Public identifiers, in every gallery photo URL. Build-time only |
 | `SANITY_READ_TOKEN` | Pages build env, **encrypted** | Only if the dataset is private. Viewer role, read-only. **Not** `NEXT_PUBLIC_` — `scripts/harden.mjs` fails the build if it reaches `out/` |
 | Cloudflare Pages deploy hook URL | Sanity webhook | The whole reason a publish appears on the site. Treat the URL as a secret: anyone holding it can trigger builds |
 
@@ -90,11 +85,10 @@ entire point of checking it there.
 
 ```
 NEXT_PUBLIC_WEB3FORMS_KEY
+NEXT_PUBLIC_FORM_ENDPOINT        (only if not Web3Forms)
 NEXT_PUBLIC_LEAD_WEBHOOK_URL
 NEXT_PUBLIC_CAREERS_ENDPOINT
 NEXT_PUBLIC_TURNSTILE_SITE_KEY
-NEXT_PUBLIC_GOOGLE_PLACES_KEY
-NEXT_PUBLIC_GOOGLE_PLACE_ID
 NEXT_PUBLIC_PLAUSIBLE_DOMAIN
 SANITY_PROJECT_ID
 SANITY_DATASET
@@ -109,7 +103,7 @@ Pages build settings, since the Next project is not at the repo root:
 | Framework preset | None |
 | Build command | `npm run build` |
 | Build output directory | `out` |
-| **Root directory (advanced)** | `client-site` |
+| **Root directory (advanced)** | `site` |
 
 Node comes from `.nvmrc` (20). If Pages ignores it, set `NODE_VERSION=20`.
 
@@ -146,7 +140,7 @@ of the route instead, and costs nothing at the client's size.
 | | |
 |---|---|
 | **What to create** | Zero Trust → Access → Applications → **Self-hosted** |
-| **Application name** | `the client résumé downloads` |
+| **Application name** | `<Client name> résumé downloads` |
 | **Domain** | the relay's hostname, path `resume` — i.e. `relay.example.com/resume`. A path-scoped application covers everything under it |
 | **Identity provider** | Google (Workspace). Free tier covers 50 users; the client will use a handful |
 | **Policy** | Action **Allow**, rule *Emails ending in* `@example.com` — or *Emails* with the specific addresses if the client's mail is not on its own domain |
@@ -198,19 +192,20 @@ covers storage we control.
 
 ---
 
-## 7. Privacy policy must be updated before two of these switch on
+## 7. The privacy policy must be written before any of these switch on
 
-`app/privacy/page.tsx` names Web3Forms, Calendly, Plausible, Cloudflare and
-R2. It does **not** mention Google Places or the lead relay/CRM. Both are
-processors handling visitor data:
+`app/privacy/page.tsx` ships as a **stub** — the rendered page is a
+`TODO(client)` placeholder. Its header comment is the checklist: it lists
+every processor this template's infrastructure can introduce (Web3Forms, the
+lead relay and its CRM, R2 résumé storage, Turnstile, Plausible, call
+tracking, the booking embed, and the localStorage consent flag). Every one
+that is switched on for this client needs a paragraph; every one that is off
+must not be mentioned.
 
-- Google Places sends the visitor's IP to Google on every page view that
-  renders reviews
-- The relay stores names, phone numbers and addresses, and forwards them to a
-  third-party CRM — name the CRM once it is chosen. If that is HubSpot, it is
-  a US processor receiving the name, phone, email, address and whatever the
-  visitor typed in the message box
+The one the comment cannot fill in for you is the CRM: the relay stores names,
+phone numbers and addresses and forwards them to whichever CRM is configured,
+so name it once it is chosen — and name Zapier or Make too if the webhook
+runs through one, since that is a second processor receiving the name, phone,
+email, address and whatever the visitor typed in the message box.
 
-Add both paragraphs *before* setting the corresponding keys, not after. The
-file's own header comment already says to do this whenever a processor is
-added.
+Write each paragraph *before* setting the corresponding key, not after.

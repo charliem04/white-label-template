@@ -64,8 +64,9 @@ ships", and the runbooks are in [`docs/`](./docs).
 
 ## 7. Workers — only the ones this client uses
 - [ ] `workers/lead-relay/wrangler.toml` — D1 id, `ALLOWED_ORIGINS`,
-      `RELAY_PUBLIC_ORIGIN`, `CRM_ADAPTER`. Read the Access notes before
-      deploying: `/resume/` has no code-level auth by design
+      `RELAY_PUBLIC_ORIGIN`, and the `CRM_WEBHOOK_URL` secret once a CRM
+      or Zapier/Make hook exists. Read the Access notes before deploying:
+      `/resume/` has no code-level auth by design
 - [ ] `workers/careers-upload/wrangler.toml` — bucket, `ALLOWED_ORIGINS`,
       Turnstile secret, retention (`npm run retention`)
 
@@ -79,7 +80,7 @@ ships", and the runbooks are in [`docs/`](./docs).
 
 ## 9. Verify before DNS cutover (`docs/CUTOVER.md` is the full sequence)
 - [ ] `cd site && npm run build` — all five gates green
-- [ ] `cd workers/lead-relay && npm test` — 23 passing (Node 22.6+)
+- [ ] `cd workers/lead-relay && npm test` — 12 passing (Node 22.6+)
 - [ ] `npm run check` — no `placeholder-identity` warnings left
 - [ ] Grep the repo for `TODO(client)` — zero results
 - [ ] Form end-to-end: email arrives, subject leads with the urgency; the

@@ -67,35 +67,21 @@ crons = ["*/15 * * * *"]
 ALLOWED_ORIGINS = "" # TODO(client) — e.g. "https://www.example.com,https://example.com"
 RATE_LIMIT_PER_HOUR = "10"
 
-# ── Which CRM, and which rows ────────────────────────────────────────
-# CRM_ADAPTER picks how leads are forwarded. Unset means "generic": the
-# flat JSON POST to CRM_WEBHOOK_URL that a Zapier catch hook or a
-# no-code mapper wants. "hubspot" talks to HubSpot's CRM Objects API
-# directly and reads CRM_AUTH_TOKEN as the service key — the
-# See src/crm/hubspot.ts for exactly what it posts.
+# ── Which CRM ────────────────────────────────────────────────────────
+# CRM_ADAPTER picks how leads are forwarded. Unset means "generic", the
+# only adapter shipped: a flat JSON POST to CRM_WEBHOOK_URL, which is
+# what a Zapier or Make catch hook, or a CRM's own inbound webhook,
+# wants. See src/crm/generic.ts for exactly what it posts.
 #
-# A value that is neither is treated as no CRM at all rather than
+# A value that names no adapter is treated as no CRM at all rather than
 # silently falling back, so a typo parks leads as 'disabled' instead of
 # posting them somewhere unintended. Fix the spelling and the next sweep
 # delivers the backlog.
 #
-
-# TODO(client): leave this commented out until a CRM is chosen. Unset
-# means the generic adapter, and with no CRM_WEBHOOK_URL set that means
-# rows are stored 'disabled' — captured, and delivered in full by the
-# retry sweep the moment a CRM is configured. That is a SUPPORTED state,
-# not a half-finished one, and it is the correct state on day one.
-# CRM_ADAPTER = "hubspot"
-
-#
-# Job applications are NOT forwarded to a CRM that honours this setting
-# (HubSpot does; the generic webhook takes both kinds as it always has).
-# A sales contact list is not an applicant tracker: applicants distort
-# every "here are your leads" view, spend the same contact allowance as
-# customers, and carry a different retention promise. They are stored in
-# D1 and in /export.csv either way.
-#
-# CRM_FORWARD_APPLICATIONS = "true"
+# Leave it unset. With no CRM_WEBHOOK_URL secret either, rows are stored
+# 'disabled' — captured, and delivered in full by the retry sweep the
+# moment the webhook is set. That is a SUPPORTED state, not a
+# half-finished one, and it is the correct state on day one.
 
 # This Worker's own public origin — scheme and host, no trailing slash.
 # It is what turns a lead into a clickable résumé link in the CRM:
@@ -113,23 +99,21 @@ RATE_LIMIT_PER_HOUR = "10"
 RELAY_PUBLIC_ORIGIN = "" # TODO(client) — e.g. https://relay.example.com
 
 # Adding a CRM is one file in src/crm/ and one line in its registry.
-# CRM_ADAPTER = "generic"
 
 # ── Secrets — set with `wrangler secret put`, never in this file ─────
 #
 #   wrangler secret put INGEST_SECRET    <- REQUIRED for /application
 #   wrangler secret put EXPORT_TOKEN     <- REQUIRED for /export.csv
 #   wrangler secret put CRM_WEBHOOK_URL  <- the "generic" adapter's target
-#   wrangler secret put CRM_AUTH_TOKEN   <- service key; REQUIRED by "hubspot"
+#   wrangler secret put CRM_AUTH_TOKEN   <- optional bearer token for the webhook
 #   wrangler secret put CRM_APPLICATION_WEBHOOK_URL  <- optional: send applicants elsewhere
 #
 # INGEST_SECRET is shared with the careers Worker, which sends job
 # applications here server-to-server. Both sides must carry the same
 # value; set it there with the same command.
 #
-# An unconfigured CRM is a SUPPORTED state, not a half-finished one —
-# whether that means no CRM_WEBHOOK_URL on the generic adapter or no
-# CRM_AUTH_TOKEN on HubSpot. Leads are stored with crm_status='disabled'
+# An unconfigured CRM — no CRM_WEBHOOK_URL — is a SUPPORTED state, not a
+# half-finished one. Leads are stored with crm_status='disabled'
 # and nothing is lost: setting the secret later makes the next retry
 # sweep deliver the whole backlog. That is the point of the relay.
 #
@@ -148,8 +132,7 @@ RELAY_PUBLIC_ORIGIN = "" # TODO(client) — e.g. https://relay.example.com
 # and that promise only covers storage we control.
 #
 # It is a secret rather than a var for the same reason CRM_WEBHOOK_URL
-# is: a HubSpot submit URL has the portal and form ids in the path, and
-# an inbound webhook URL is usually the whole credential.
+# is: an inbound webhook URL is usually the whole credential.
 
 # ── Cloudflare Access on /resume/* ───────────────────────────────────
 # GET /resume/:leadId streams a job applicant's CV. It has NO code-level
