@@ -122,6 +122,13 @@ export const INTEGRATIONS = {
     "https://calendly.com",
     "https://cal.com",
     "https://challenges.cloudflare.com", // Turnstile renders in an iframe
+    // TODO(client): the Google Maps embed in client.mapEmbedSrc
+    // (components/Contact.tsx). Its src is
+    // https://www.google.com/maps/embed?…, so the frame origin is
+    // www.google.com; the tiles and scripts load inside that iframe
+    // under Google's own policy, not this one. Delete this line if the
+    // client has no map.
+    "https://www.google.com",
   ],
 
   /** Origins serving <video>/<audio>. "'self'" is already allowed. */

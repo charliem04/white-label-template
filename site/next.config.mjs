@@ -9,6 +9,12 @@ const nextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
+  eslint: {
+    // Next lints app/, components/ and lib/ by default. content/ is
+    // typed modules every page imports, so it gets the same rules —
+    // both in `npm run lint` and in the lint step of `next build`.
+    dirs: ["app", "components", "lib", "content"],
+  },
 };
 
 export default nextConfig;
