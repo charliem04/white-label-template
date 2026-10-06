@@ -108,7 +108,7 @@ const FULL_WIDTH = 1600;
 /** The grid paints a 4:3 tile. These are the numbers in Lightbox.tsx. */
 const TILE = { width: 640, height: 480 };
 
-/* ── The five categories, from all three places that know them ────── */
+/* ── The categories, from all three places that know them ─────────── */
 
 /**
  * Read a list of category ids out of a TypeScript source file.

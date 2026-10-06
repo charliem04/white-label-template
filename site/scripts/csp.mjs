@@ -92,7 +92,6 @@ export const INTEGRATIONS = {
   connect: [
     "https://api.web3forms.com", // contact form (lib/submitContact.ts)
     "https://plausible.io", // analytics events, after consent
-    // "https://places.googleapis.com", // live Google reviews
   ],
 
   /** Origins that serve <script>. Kept short on purpose. */
@@ -111,7 +110,6 @@ export const INTEGRATIONS = {
     // else on the site loads from it — no script, no font, no
     // stylesheet — which is why it is here and in no other directive.
     "https://cdn.sanity.io",
-    // "https://*.googleusercontent.com", // Google review avatars
   ],
 
   /** Origins allowed to be embedded in an <iframe>. */

@@ -1,6 +1,7 @@
 # client-careers-upload
 
-The only server-side code in the the client project. It exists for one reason:
+The résumé intake Worker — one of the two Workers in this repo, beside
+`workers/lead-relay`. It exists for one reason:
 a static export cannot receive a file, and `/careers/` needs to take a
 résumé.
 

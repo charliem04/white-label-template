@@ -20,9 +20,9 @@ make a launch day go badly.
 
 **2. Ranking thrown away.** The old site has URLs indexed by Google and linked
 from Facebook. Every one that has no equivalent here returns 404 the moment
-DNS moves. `public/_redirects` currently holds **one real rule**. Building the
-rest requires crawling the old site, which is only possible while it is still
-up.
+DNS moves. `public/_redirects` ships with **no live rules** — only commented
+examples of likely shapes. Building the real list requires crawling the old
+site, which is only possible while it is still up.
 
 Both are cheap to prevent and expensive to fix. Everything below is ordered
 around them.
@@ -56,7 +56,7 @@ around them.
 
 ## T-7 days
 
-- [ ] Cloudflare Pages project connected — **root directory `client-site`**,
+- [ ] Cloudflare Pages project connected — **root directory `site`**,
       build `npm run build`, output `out`, production branch `main`.
 - [ ] All environment variables set for **Production and Preview both**
       (`docs/LAUNCH-CREDENTIALS.md` §4).
@@ -68,12 +68,12 @@ around them.
       `IP_HASH_SALT`, deployed, **and `npm run retention` run against the real
       bucket**. Without that lifecycle rule the twelve-month retention the
       privacy policy promises is not true.
-- [ ] **Remove `https://client-preview.pages.dev` from `ALLOWED_ORIGINS`** in
-      both `workers/lead-relay/wrangler.toml` and
-      `workers/careers-upload/wrangler.toml`, and redeploy both. It is there
-      so the terminal preview can post to them before production exists;
-      afterwards it is a third origin allowed to submit to the real relay for
-      no reason. Do this after the preview verification below, not before, or
+- [ ] **Remove the preview origin (`https://client-preview.pages.dev`) from
+      `ALLOWED_ORIGINS`** in both `workers/lead-relay/wrangler.toml` and
+      `workers/careers-upload/wrangler.toml` if you added it, and redeploy
+      both. It is added so the terminal preview can post to them before
+      production exists; afterwards it is a third origin allowed to submit to
+      the real relay for no reason. Do this after the preview verification below, not before, or
       the verification is what breaks.
 - [ ] Confirm `ALLOW_INSECURE_NO_CAPTCHA` is absent from the deployed Worker
       config. It belongs to `[env.dev.vars]` only. It is the one value where a
@@ -104,10 +104,13 @@ around them.
       decision.
 - [ ] **Send and receive a test email on the domain.** Do not declare success
       before this passes.
-- [ ] Turn on HSTS in the Cloudflare dashboard. It is deliberately not set in
-      `_headers` — committing to it before the domain is fully served over
-      HTTPS is hard to undo. Leave `includeSubDomains` and `preload` off for
-      the reasons documented at length in `public/_headers`.
+- [ ] Confirm HSTS is arriving: `curl -sI https://<domain>/ | grep -i strict`.
+      It ships in `public/_headers` (`max-age=31536000`, one year), so it
+      goes live with the first HTTPS response — which is why SSL must be
+      Full (strict) and working before this point. Leave the Cloudflare
+      dashboard's own HSTS setting off so the header has one source, and
+      leave `includeSubDomains` and `preload` off for the reasons documented
+      at length in `public/_headers`.
 - [ ] Add the **WAF rate-limiting rules** on both Worker routes.
 
 ## T+1 day
@@ -132,9 +135,6 @@ around them.
 
 ## T+7 days
 
-- [ ] Check the Google Places billing against the budget alert. This is the
-      only thing on the site that bills per visitor, and launch week is when
-      you find out what that costs.
 - [ ] Check Search Console for crawl errors and 404s the redirect map missed.
 - [ ] Confirm the retry sweep is delivering to the CRM — anything stuck reads
       `crm_status='failed'` with the CRM's own error text in `crm_error`:
@@ -162,8 +162,9 @@ curl -H "Authorization: Bearer $EXPORT_TOKEN" https://<relay>/export.csv -o lead
 
 ## After it is done
 
-- Hand over: walk the client's gallery editor through the gallery studio at
-  `<hostname>.sanity.studio`, where leads arrive, and how to pull the CSV. A
-  short screen recording is worth more here than a document.
+- Hand over: walk the client through where leads arrive and how to pull the
+  CSV — and, if a Sanity studio was set up (`docs/GALLERY-CMS.md`), how their
+  gallery editor publishes at `<hostname>.sanity.studio`. A short screen
+  recording is worth more here than a document.
 - Schedule a recurring `export.csv` pull as a backup. Gallery content is
   already safe in git; the lead book is not.
