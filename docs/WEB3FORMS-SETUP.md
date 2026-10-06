@@ -54,7 +54,7 @@ to carry.
    land in.
 2. **Use the client's own office inbox**, not the developer's and not a personal account.
    Whoever receives this mail receives the leads; the same ownership rule as
-   the Cloudflare, Sanity and HubSpot accounts in
+   the Cloudflare, Sanity and CRM accounts in
    `docs/LAUNCH-CREDENTIALS.md` §2.
 3. The access key arrives by email. It is a UUID.
 
@@ -72,7 +72,7 @@ mail-routing change rather than a new key and a site rebuild.
 ## 2. Set it locally
 
 ```bash
-cd client-site
+cd site
 cp .env.example .env.local     # if you have not already
 ```
 
@@ -162,8 +162,8 @@ dashboard over this paragraph.
 If spam gets past it, the order of escalation is: their spam protection →
 rotate the key (section 8) → a captcha on the form. Do not reach for the last
 one first. Every challenge added to a contact form costs some real enquiries,
-and a field-service form is filled in by people standing in a driveway
-looking at a damaged roof.
+and a contact form is often filled in on a phone, in a hurry, by someone
+with a problem they want fixed.
 
 ---
 
@@ -219,12 +219,12 @@ From `lib/submitContact.ts`, each notification carries:
 
 | Field | Where it comes from |
 | --- | --- |
-| `subject` | `Assessment request — <name>` |
-| `from_name` | `example.com` |
+| `subject` | `[<urgency>] Request — <name>` — urgency leads so the office can triage from the inbox list |
+| `from_name` | `client.config.ts → businessName` |
 | `name`, `phone`, `email` | The form. All three are required |
 | `address` | The property the work is for. Required |
 | `service` | One of `client.config.ts → form.serviceOptions` |
-| `urgency` | Empty today — the field exists but the form does not ask |
+| `urgency` | One of `client.config.ts → form.urgencyOptions`. Required |
 | `message` | Free text, optional |
 | `source` | The page URL the enquiry was submitted from |
 | `submittedAt` | ISO timestamp |

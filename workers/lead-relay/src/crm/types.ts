@@ -14,8 +14,9 @@
  *
  *  So forwarding is an adapter. Each one owns its request shaping, its
  *  endpoint and its auth; the Worker owns the row, the ordering and the
- *  bookkeeping. Adding JobNimbus or AccuLynx later is one new file next
- *  to this one and one line in ./index.ts, not a change to forward().
+ *  bookkeeping. `generic` is the only adapter shipped; adding a CRM's own
+ *  API later is one new file next to this one and one line in
+ *  ./index.ts, not a change to forward().
  *
  *  ── WHAT AN ADAPTER MAY NOT DO ──────────────────────────────────────
  *
@@ -65,7 +66,8 @@ export type LeadRow = {
 
 export interface CrmEnv {
   /**
-   * Which adapter forwards: "generic" (the default) or "hubspot".
+   * Which adapter forwards. "generic" is the default and the only one
+   * shipped.
    *
    * An unrecognised value is treated as no CRM at all rather than
    * quietly falling back, because a typo here would otherwise throw
@@ -94,39 +96,14 @@ export interface CrmEnv {
    * applicant carries different retention obligations from a customer —
    * the privacy policy promises their file is gone in twelve months,
    * and that is a promise about our storage, not about a CRM's.
-   *
-   * Read only by `generic`. An adapter talking to a real CRM API has
-   * one endpoint, not two, and expresses the same choice through
-   * CRM_FORWARD_APPLICATIONS instead.
    */
   CRM_APPLICATION_WEBHOOK_URL?: string;
 
   /**
-   * Sent as `Authorization: Bearer …` on the forward. The `generic`
-   * adapter includes it when set; the `hubspot` adapter REQUIRES it —
-   * there it is the HubSpot service key, and without one that
-   * adapter reports itself unconfigured rather than sending requests
-   * that could only 401.
+   * Sent as `Authorization: Bearer …` on the forward when set, for a
+   * webhook target that wants one.
    */
   CRM_AUTH_TOKEN?: string;
-
-  /**
-   * Whether job applications are forwarded as well as leads. Off
-   * unless set to 1/true/yes/on, and read only by adapters that
-   * choose to honour it — the `generic` webhook takes both kinds, as
-   * it always has.
-   *
-   * Off by default for HubSpot because a sales contact list is not an
-   * applicant tracker. Applicants in it put every "here are your leads"
-   * view out by however many people applied that month, spend the same
-   * contact allowance as customers, and carry different retention
-   * obligations — the résumé side of this system promises twelve
-   * months, and the CRM knows nothing about that promise.
-   *
-   * Nothing is lost either way: applications are stored in D1 and
-   * appear in /export.csv regardless of this setting.
-   */
-  CRM_FORWARD_APPLICATIONS?: string;
 
   /**
    * The Worker's own public origin, e.g. https://relay.example.com —
@@ -149,12 +126,6 @@ export interface CrmEnv {
    * arrive with no link, and the log says so on every one.
    */
   RELAY_PUBLIC_ORIGIN?: string;
-}
-
-const TRUTHY = new Set(["1", "true", "yes", "on"]);
-
-export function forwardsApplications(env: CrmEnv): boolean {
-  return TRUTHY.has((env.CRM_FORWARD_APPLICATIONS ?? "").trim().toLowerCase());
 }
 
 /* ── Row helpers the adapters share ─────────────────────────────── */
@@ -247,8 +218,8 @@ export interface CrmAdapter {
    *            the sweep delivers it the moment somewhere exists.
    *
    * Defaulted to 'skipped' because that is the usual reason an adapter
-   * declines — HubSpot turning applications away is policy, not a
-   * missing setting. `generic` overrides it: it only ever declines for
+   * declines — a CRM that does not take job applications is policy,
+   * not a missing setting. `generic` overrides it: it only ever declines for
    * want of a URL, and forgetting a URL must not permanently bury the
    * leads captured before it was set.
    */

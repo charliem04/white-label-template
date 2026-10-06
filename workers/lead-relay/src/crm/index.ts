@@ -8,7 +8,6 @@
  */
 
 import { generic } from "./generic.ts";
-import { hubspot } from "./hubspot.ts";
 import type { CrmAdapter, CrmEnv, LeadKind, LeadRow } from "./types.ts";
 
 export type {
@@ -23,7 +22,6 @@ export { parsedAnswers, resumeUrl } from "./types.ts";
 
 const ADAPTERS: Record<string, CrmAdapter> = {
   [generic.id]: generic,
-  [hubspot.id]: hubspot,
 };
 
 /**
@@ -63,10 +61,10 @@ export function crmConfigured(env: CrmEnv): boolean {
  * back. The single place that decision is made.
  *
  * 'pending'  there is a CRM and it wants this row
- * 'skipped'  there is a CRM, and not taking this row is a decision —
- *            an application with CRM_FORWARD_APPLICATIONS off. The
- *            sweep leaves these alone forever, so switching that
- *            variable on does not backfill by itself.
+ * 'skipped'  there is a CRM, and not taking this row is a decision the
+ *            adapter made (see declineReason in ./types.ts). The
+ *            sweep leaves these alone forever. `generic` never
+ *            produces it; the state exists for adapters that do.
  * 'disabled' there is nowhere to send this row yet, or CRM_ADAPTER is
  *            misspelled. The sweep delivers these the moment there is.
  *
@@ -92,15 +90,15 @@ export function crmStatusFor(row: LeadRow, env: CrmEnv): string {
  *
  * It asks the ADAPTER rather than reading CRM_WEBHOOK_URL, because
  * that env var is the generic adapter's destination and nobody else's.
- * HubSpot never sets it, so a sweep gated on it would return no kinds
- * and silently never retry anything — which is the one guarantee this
- * Worker exists to make.
+ * An adapter for a CRM API would never set it, so a sweep gated on it
+ * would return no kinds and silently never retry anything — which is
+ * the one guarantee this Worker exists to make.
  */
 export function deliverableKinds(env: CrmEnv): LeadKind[] {
   const adapter = adapterFor(env);
   if (!adapter || !adapter.configured(env)) return [];
 
-  // accepts() takes a row, and both adapters read only `kind` off it.
+  // accepts() takes a row, and adapters read only `kind` off it.
   // A probe row keeps that an implementation detail of the adapter
   // rather than a second, drifting copy of the same rule here.
   return (["lead", "application"] as LeadKind[]).filter((kind) =>

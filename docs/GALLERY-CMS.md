@@ -207,7 +207,7 @@ Change a caption in the studio, press Publish, and watch:
 1. Sanity → API → Webhooks → the webhook's **delivery log** shows a 200.
 2. Cloudflare Pages → Deployments shows a build starting, triggered by
    *Deploy hook*.
-3. The build log shows `[gallery] fetched 40 photos from sanity:…`.
+3. The build log shows `[gallery] fetched <n> photos from sanity:…`.
 4. `/gallery/` shows the new caption.
 
 If any step is silent, that is the step to fix. Each one is a different
@@ -220,11 +220,12 @@ problem — see Troubleshooting.
 > npm run preview:deploy
 > ```
 >
-> 1. The output shows `[gallery] fetched 40 photos from sanity:…`. If it
+> 1. The output shows `[gallery] fetched <n> photos from sanity:…`. If it
 >    says `SANITY_PROJECT_ID is not set — using the committed gallery`
 >    instead, the export did not take: re-read the note in step 3.
 > 2. `git diff content/gallery.generated.json` shows your caption, and
->    the `source` line no longer starting `migration:`. **Commit it** —
+>    the `source` line now reading `sanity:<project>/<dataset>` rather
+>    than `placeholder — no CMS configured yet`. **Commit it** —
 >    that file is what gives the gallery a history and what the build
 >    falls back to.
 > 3. `/gallery/` on the preview URL shows the new caption.
@@ -263,11 +264,11 @@ Open the studio, click **Gallery**.
 ### Alt text is not optional
 
 It is what a blind visitor's screen reader reads aloud, and it is what
-Google Images indexes — which for a contractor is a real source of
+Google Images indexes — which for a local business is a real source of
 work. Describe the frame:
 
-> ✅ "Crew setting metal panels over underlayment on a low-slope
-> section"
+> ✅ "Two technicians fitting a new unit against the side of a brick
+> house"
 > ❌ "photo", "IMG_4471", "Example Company Springfield contractor"
 
 The third one is keyword stuffing. Google has been discounting it since
@@ -288,7 +289,7 @@ otherwise have on a large screen.
 
 Click a photo, then the crop tool. Drag the circle to set the **focal
 point** — the part that must survive the grid's 4:3 crop. The build
-honours it, so a roofline is not cut out of the tile.
+honours it, so the subject is not cut out of the tile.
 
 ---
 
@@ -298,7 +299,8 @@ honours it, so a roofline is not cut out of the tile.
 message naming the photo, if:
 
 - a photo has no alt text, or under three characters of it
-- a category is not one of the five real ones
+- a category is not one of the ids in the `GalleryCategory` union in
+  `content/types.ts`
 - the same photograph is in the list twice
 - Sanity reports no pixel dimensions for an image
 - the studio's category list has drifted from the site's own
@@ -310,7 +312,7 @@ an import script, the CLI, or a token and `curl` write straight to the
 API, which does not run the studio's validation. A build that stops and
 names the photograph is the check that cannot be bypassed.
 
-**Why the categories are checked three ways.** The five kinds of work
+**Why the categories are checked three ways.** The kinds of work
 are a business fact, not a content entry: each maps to a service page
 that has to exist. So they are a TypeScript union in
 `content/types.ts`, a list of labels and routes in `content/gallery.ts`,
@@ -320,7 +322,7 @@ editing all three in one commit, on purpose.
 
 If a bad entry ever does reach the site, `content/gallery.ts` drops that
 one photo rather than letting the page fail — a missing photo is
-recoverable, a broken `/gallery/` during a storm week is not.
+recoverable, a broken `/gallery/` in the client's busiest week is not.
 
 ---
 

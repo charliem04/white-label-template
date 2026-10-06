@@ -13,8 +13,8 @@
  *
  *  ── WHY IT IS CRM-AGNOSTIC, WHICH IS THE WHOLE POINT ────────────────
  *
- *  The CRM has not been picked yet. Writing directly to HubSpot or
- *  Jobber or AccuLynx would mean either waiting for that decision — and
+ *  The CRM has not been picked yet. Writing directly to any one CRM's
+ *  API would mean either waiting for that decision — and
  *  losing every lead in the meantime — or rewriting both forms when it
  *  is made. So the relay stores first and forwards second, through an
  *  adapter chosen by CRM_ADAPTER. Until one is configured every lead is
@@ -23,9 +23,9 @@
  *
  *  The adapters live in src/crm/ and that is the only place a CRM is
  *  named. `generic` posts flat JSON at CRM_WEBHOOK_URL, which is what a
- *  Zapier hook wants and is still the default; `hubspot` talks to the
- *  CRM Objects API and is the demo account. Adding a roofing CRM later
- *  is a file next to those two — this file does not change.
+ *  Zapier or Make hook wants, and is the only adapter shipped. Adding a
+ *  CRM's own API later is a file next to it — this file does not
+ *  change.
  *
  *  ── THE ORDER OF OPERATIONS IS THE DESIGN ───────────────────────────
  *
@@ -375,9 +375,9 @@ async function forward(row: LeadRow, env: Env): Promise<void> {
   if (!adapter || !adapter.configured(env)) return;
 
   /*
-   * A row this CRM does not take: an application with
-   * CRM_FORWARD_APPLICATIONS off, or a row stored under one adapter and
-   * swept under another. Recorded rather than left pending, so the
+   * A row this CRM does not take: an application with no destination
+   * for its kind, or a row stored under one adapter and swept under
+   * another. Recorded rather than left pending, so the
    * sweep stops picking it up every fifteen minutes forever and so
    * /export.csv says plainly that nobody tried — not that something
    * failed.
@@ -421,7 +421,7 @@ async function forward(row: LeadRow, env: Env): Promise<void> {
  * The retry sweep, run on a schedule.
  *
  * Oldest first, so a backlog drains in the order it arrived rather than
- * newest-first — somebody who asked for a roof assessment on Tuesday
+ * newest-first — somebody who asked for an assessment on Tuesday
  * should not sit behind Friday's just because the CRM came back on
  * Friday. Rows past MAX_CRM_ATTEMPTS are left alone and stay visible in
  * the table as failed; something that has refused six times is a
@@ -432,8 +432,8 @@ async function retryFailed(env: Env): Promise<number> {
 
   // Only ask for kinds the configured adapter can actually deliver.
   // The adapter decides, because CRM_WEBHOOK_URL is the generic
-  // adapter's destination and nobody else's — gating this on it meant
-  // HubSpot, which never sets it, swept nothing at all.
+  // adapter's destination and nobody else's — gating this on it would
+  // mean an adapter that never sets it sweeps nothing at all.
   const kinds = deliverableKinds(env);
   if (!kinds.length) return 0;
 
@@ -442,9 +442,8 @@ async function retryFailed(env: Env): Promise<number> {
    * time delivers everything captured before it existed. 'skipped' is
    * deliberately NOT: those rows are a decision, not a backlog, and
    * leaving them in would eventually fill every batch of 25 with the
-   * same applications and starve the leads behind them. Turning
-   * CRM_FORWARD_APPLICATIONS on therefore does not backfill by itself —
-   * that is one statement, documented in docs/HUBSPOT-SETUP.md:
+   * same applications and starve the leads behind them. To send
+   * skipped rows after all, it is one statement:
    *   UPDATE leads SET crm_status='pending' WHERE crm_status='skipped';
    */
   const { results } = await env.DB.prepare(
@@ -799,8 +798,8 @@ export default {
      * so while the visitor is still on the page.
      *
      * An application is not held to that. The careers form asks for an
-     * email optionally on purpose — the roofer filling it in one-handed
-     * in a truck has a phone number and may not check an inbox — so the
+     * email optionally on purpose — someone filling it in one-handed
+     * on a job site has a phone number and may not check an inbox — so the
      * older floor still applies there: some way to reach the person.
      *
      * Both rules are about reachability, not format. Whether an address
